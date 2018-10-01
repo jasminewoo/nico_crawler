@@ -1,0 +1,3 @@
+[submodule "pyniconico"]
+	path = pyniconico
+	url = git@github.com:lekordable/pyniconico.git
