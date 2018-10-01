@@ -1,25 +1,29 @@
-from nicotools.download import VideoDmc, VideoSmile, Comment, Thumbnail
+import logging
 
-import requests
+from nicotools.download import Video as NicoToolsVideo
 
 import global_config
 
+log = logging.getLogger(__name__)
+
 
 class Video:
-    def __init__(self, url=None, js=None):
-        self.video_id = None
-        self.title = ''
-
-        if js:
-            self._js = js
-            self.video_id = js['video_id']
-            self.title = js['title']
-            self.is_available = js['deleted'] == '0'
+    def __init__(self, url=None, info=None):
+        self.title = None
+        if info:
+            self._js = info
+            self.video_id = info['video_id']
+            self.title = info['title']
+            self.is_available = info['deleted'] == '0'
         else:
-            # TODO: parse the url and assign value to self.video_id
-            pass
+            self.video_id = url.split('/')[-1]
+
+    def __str__(self):
+        return '{} {}'.format(self.title, self.video_id) if self.title else self.video_id
 
     def download(self):
+        if not self.is_available:
+            log.info('Skip: the video was deleted {}'.format(self))
         if not self.video_id:
             raise AssertionError('self.video_id must be provided')
 
@@ -27,9 +31,6 @@ class Video:
         password = global_config.instance['password']
 
         video_ids = [self.video_id]
-        DIR_PATH = global_config.instance['download_location']
+        dir_path = global_config.instance['download_location']
 
-        if video_ids[0].startswith('sm'):
-            VideoSmile(mail, password).start(video_ids, DIR_PATH)
-        else:
-            VideoDmc(mail, password).start(video_ids, DIR_PATH)
+        NicoToolsVideo(video_ids, save_dir=dir_path, mail=mail, password=password).start()
