@@ -17,5 +17,9 @@ if __name__ == '__main__':
 
     for video in videos:
         log.info('Start {}'.format(video))
-        video.download()
-        log.info('Done  {}'.format(video))
+        try:
+            video.download()
+            log.info('Done  {}'.format(video))
+        except Exception as e:
+            log.info('Fail  {}'.format(video))
+            log.exception(e)
