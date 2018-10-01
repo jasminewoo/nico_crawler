@@ -26,6 +26,9 @@ class MyList:
         if not my_json:
             raise RuntimeError('Could not get data from {}'.format(self.url))
 
+        vids = []
         for item in my_json:
-            v = Video(item['item_data'])
-            v.download()
+            v = Video(info=item['item_data'])
+            vids.append(v)
+
+        return vids
