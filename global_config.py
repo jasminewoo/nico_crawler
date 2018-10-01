@@ -1,15 +1,13 @@
-class Config:
-    def __init__(self, config_file_path):
-        self._path = config_file_path
-        self._dict = None
+import json
 
-    @property
-    def dict(self):
-        if not self._dict:
-            with open('config.json', 'r') as fp:
-                import json
-                self._dict = json.load(fp)
-        return self._dict
+
+class Config(dict):
+    def __init__(self, config_file_path):
+        dict.__init__(self)
+        with open(config_file_path, 'r') as fp:
+            kvp = json.load(fp)
+            for key in kvp:
+                self[key] = kvp[key]
 
 
 instance = Config('config.json')
