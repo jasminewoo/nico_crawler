@@ -13,12 +13,7 @@ if __name__ == '__main__':
         raise FileNotFoundError(
             'config not found. Create a json file with the following details: download_location, email, password')
 
-    videos = []
-    if 'mylist' in url:
-        ml = MyList(url)
-        videos = ml.videos
-    else:
-        videos = [Video(url)]
+    videos = MyList(url).videos if 'mylist' in url else [Video(url)]
 
     for video in videos:
         log.info('Start {}'.format(video))
