@@ -3,4 +3,7 @@ class Video:
         self._js = js
         self.video_id = js['video_id']
         self.title = js['title']
-        self.is_deleted = js['deleted'] != '0'
+        self.is_available = js['deleted'] == '0'
+
+    def download(self):
+        pass
