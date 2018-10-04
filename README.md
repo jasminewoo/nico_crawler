@@ -21,6 +21,6 @@ where `url` is:
 
 |Type|Example|Description|Notes|
 |---|---|---|---|
-|video_id|`sm12345678`|The video will be downloaded|
-|mylist|`mylist/123456`|All videos in the list will be downloaded|
-|search|`search/keyword`|- All _popular_ videos in the serach result will be downloaded.| Refer to `minimum_mylist` in [`config.json`](config.json) |
+|video_id|`.../sm12345678`|The video will be downloaded|
+|mylist|`.../mylist/123456`|All videos in the list will be downloaded|
+|search|`.../search/keyword`|- All _popular_ videos in the serach result will be downloaded.| `minimum_mylist` in [`config.json`](config.json) is used to identify popular videos|
