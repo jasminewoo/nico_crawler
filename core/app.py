@@ -15,7 +15,7 @@ class App:
         # TODO: wait for all threads to .join()
 
     def process(self, url):
-        if 'mylist.py' in url:
+        if 'mylist' in url:
             videos = MyList(url=url).videos
         elif 'search' in url:
             videos = Search(url=url).videos
