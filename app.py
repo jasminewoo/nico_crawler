@@ -12,6 +12,7 @@ class App:
     def __init__(self):
         self.queue = CyclicQueue()
         # TODO create thread pool
+        # TODO: wait for all threads to .join()
 
     def process(self, url):
         if 'mylist' in url:
