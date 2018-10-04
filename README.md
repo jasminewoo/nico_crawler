@@ -1,8 +1,9 @@
 # nico_crawler
 
 - Download & convert nico videos as audio files.
-- Queue-based concurrent downloads (Up to 4 threads)
+- Queue-based concurrent downloads (Recommended: up to 4)
 - Failed downloads get added back to the end of the queue
+- The queue periodically gets written to the disk in case of application/system shutdown
 
 ## Prerequisite
 
