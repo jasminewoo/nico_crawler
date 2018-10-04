@@ -2,11 +2,14 @@ import logging
 import os
 
 from app import App
+from logging_utils import config_logging
 
 log = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     url = 'http://www.nicovideo.jp/mylist/48382005'
+
+    config_logging()
 
     if not os.path.exists('config.json'):
         raise FileNotFoundError(
