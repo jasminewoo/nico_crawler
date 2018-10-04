@@ -30,7 +30,7 @@ class CyclicQueue:
         exists = False
         for qe in self._list:
             if qe.video.video_id == video.video_id:
-                log.debug('Trying to add {}, but it already exists in the queue'.format(video))
+                log.debug('Already in the queue: {}'.format(video))
                 exists = True
                 break
 
@@ -40,14 +40,18 @@ class CyclicQueue:
         self._lock.release()
 
     def peek_and_reserve(self):
-        qe_to_return = None
         self._lock.acquire()
+
+        to_return = None
         for qe in self._list:
             if qe.is_available and not qe.is_done:
                 qe.is_available = False
-                qe_to_return = qe
+                to_return = qe.video
+                break
+
         self._lock.release()
-        return qe_to_return
+
+        return to_return
 
     def mark_as_done(self, video):
         self._lock.acquire()
@@ -102,3 +106,10 @@ class CyclicQueue:
                 if not qe.is_done:
                     fp.write(qe.video.video_id + '\n')
         self._lock.release()
+
+    def stop_timer(self):
+        self._lock.acquire()
+        if os.path.exists(k_DEFAULT_DISK_LOCATION):
+            os.remove(k_DEFAULT_DISK_LOCATION)
+        self._lock.release()
+        self.timer.stop()

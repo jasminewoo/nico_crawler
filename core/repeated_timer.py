@@ -11,14 +11,16 @@ class RepeatedTimer(object):
         self.args = args
         self.kwargs = kwargs
         self._setup_timer()
+        self.need_to_stop = False
 
     def _run(self):
         self.function(*self.args, **self.kwargs)
-        self._setup_timer()
+        if not self.need_to_stop:
+            self._setup_timer()
 
     def _setup_timer(self):
         self._timer = Timer(1, self._run)
         self._timer.start()
 
     def stop(self):
-        self._timer.cancel()
+        self.need_to_stop = True
