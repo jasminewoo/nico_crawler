@@ -1,5 +1,5 @@
 import logging
-import os
+import sys
 
 from core.app import App
 from core.logging_utils import config_logging
@@ -7,9 +7,11 @@ from core.logging_utils import config_logging
 log = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-    url = 'http://www.nicovideo.jp/mylist/48382005'
+
+    if len(sys.argv) < 1:
+        raise AssertionError('Please provide a URL')
 
     config_logging()
 
     app = App()
-    app.process(url=url)
+    app.process(url=sys.argv[1])
