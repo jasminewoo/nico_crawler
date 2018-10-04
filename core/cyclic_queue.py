@@ -109,7 +109,7 @@ class CyclicQueue:
 
     def stop_timer(self):
         self._lock.acquire()
-        if os.path.exists(k_DEFAULT_DISK_LOCATION):
+        if len(self._list) == 0 and os.path.exists(k_DEFAULT_DISK_LOCATION):
             os.remove(k_DEFAULT_DISK_LOCATION)
         self._lock.release()
         self.timer.stop()
