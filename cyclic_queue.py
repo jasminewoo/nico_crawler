@@ -85,9 +85,11 @@ class CyclicQueue:
     def load_from_previous_session(self):
         self._lock.acquire()
         if os.path.exists(k_DEFAULT_DISK_LOCATION):
-            with open(k_DEFAULT_DISK_LOCATION,'r') as fp:
+            with open(k_DEFAULT_DISK_LOCATION, 'r') as fp:
                 for video_id in fp.readlines():
-                    self._list.append(QueueElement(Video(video_id=video_id)))
+                    video = Video(video_id=video_id)
+                    qe = QueueElement(video=video)
+                    self._list.append(qe)
 
         self._lock.release()
 
