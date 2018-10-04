@@ -30,3 +30,27 @@ where `url` is:
 ```bash
 nohup ./download.sh {url} &
 ```
+
+## Notes
+
+```bash
+url="..."
+youtube-dl -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' -o '~/Downloads/%(title)s-%(id)s.%(ext)s' -i -x $url
+```
+
+```bash
+# install pip3
+apt-get install software-properties-common
+apt-add-repository universe
+apt-get update
+apt-get install python3-pip
+
+# install tools
+curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+chmod a+rx /usr/local/bin/youtube-dl
+apt install ffmpeg
+apt install zip
+
+# Clone code
+git clone https://github.com/lekordable/nico_crawler.git
+```
