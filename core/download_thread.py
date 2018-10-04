@@ -1,6 +1,4 @@
 import logging
-import random
-import time
 from threading import Thread
 
 log = logging.getLogger(__name__)
@@ -17,7 +15,7 @@ class DownloadThread(Thread):
             video = self.queue.peek_and_reserve()
             if video:
                 log.debug('Starting to process {}'.format(video))
-                success = _get_dummy_result()
+                success = video.download()
                 if success:
                     self.queue.mark_as_done(video)
                     log.info('Finished: {}'.format(video))
@@ -27,8 +25,3 @@ class DownloadThread(Thread):
             else:
                 log.debug('This thread is out of work. Existing now...')
                 break
-
-
-def _get_dummy_result():
-    time.sleep(1)
-    return random.randint(0,1) == 1
