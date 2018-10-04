@@ -1,9 +1,10 @@
-import logging
-
+from __future__ import unicode_literals
 import youtube_dl
+import logging
 
 import global_config
 
+logging.getLogger('youtube_dl').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ class Video:
 
     @property
     def url(self):
-        pass
+        return 'http://www.nicovideo.jp/watch/' + self.video_id
 
     def download(self):
         if not self.video_id:
@@ -33,7 +34,7 @@ class Video:
 
         is_successful = False
 
-        ydl = youtube_dl.YoutubeDL(params=get_params())
+        ydl = youtube_dl.YoutubeDL(get_ydl_options())
         ret_code = ydl.download([self.url])
 
         if ret_code == 0:
@@ -44,6 +45,30 @@ class Video:
         return is_successful
 
 
-def get_params():
-    # TODO: enter things here
-    return []
+class SilentLogger(object):
+    def debug(self, msg):
+        pass
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        log.error(msg)
+
+
+def get_ydl_options():
+    return {
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'm4a',
+            'preferredquality': '320',
+        }],
+        'logger': SilentLogger(),
+        'progress_hooks': [my_hook],
+    }
+
+
+def my_hook(d):
+    if d['status'] == 'finished':
+        log.debug('Done downloading, now converting ...')
