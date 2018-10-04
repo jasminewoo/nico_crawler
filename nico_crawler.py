@@ -16,4 +16,4 @@ if __name__ == '__main__':
             'config not found. Create a json file with the following details: download_location, email, password')
 
     app = App()
-    app.process(url)
+    app.process(url=url)
