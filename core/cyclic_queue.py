@@ -2,8 +2,8 @@ import logging
 import os
 from multiprocessing import Lock
 
-from Video import Video
-from repeated_timer import RepeatedTimer
+from core.video import Video
+from core.repeated_timer import RepeatedTimer
 
 k_DEFAULT_DISK_LOCATION = 'queue.txt'
 

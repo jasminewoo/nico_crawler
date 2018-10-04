@@ -1,9 +1,9 @@
 import logging
 
-from MyList import MyList
-from Search import Search
-from Video import Video
-from cyclic_queue import CyclicQueue
+from core.mylist import MyList
+from core.search import Search
+from core.video import Video
+from core.cyclic_queue import CyclicQueue
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class App:
         # TODO: wait for all threads to .join()
 
     def process(self, url):
-        if 'mylist' in url:
+        if 'mylist.py' in url:
             videos = MyList(url=url).videos
         elif 'search' in url:
             videos = Search(url=url).videos

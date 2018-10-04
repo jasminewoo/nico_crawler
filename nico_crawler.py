@@ -1,8 +1,8 @@
 import logging
 import os
 
-from app import App
-from logging_utils import config_logging
+from core.app import App
+from core.logging_utils import config_logging
 
 log = logging.getLogger(__name__)
 

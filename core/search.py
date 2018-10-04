@@ -1,9 +1,8 @@
 # http://www.nicovideo.jp/search/sm7141460+歌ってみた?page=2&sort=m&order=d
-import json
 
 import requests
 
-from Video import Video
+from core.video import Video
 
 
 class Search:

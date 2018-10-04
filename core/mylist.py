@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from Video import Video
+from core.video import Video
 
 
 class MyList:
