@@ -107,3 +107,6 @@ venv.bak/
 .ds_store
 queue.txt
 queue.txt.bak
+*.mp4
+*.part
+*.m4a
