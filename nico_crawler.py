@@ -18,7 +18,7 @@ if __name__ == '__main__':
     elif 'search' in url:
         pass
     else:
-        videos = [Video(url)]
+        videos = [Video(url=url)]
 
     # TODO thread pool ( 4 concurrent threads )
 
