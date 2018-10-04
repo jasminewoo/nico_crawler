@@ -86,6 +86,9 @@ class CyclicQueue:
         if os.path.exists(k_DEFAULT_DISK_LOCATION):
             with open(k_DEFAULT_DISK_LOCATION, 'r') as fp:
                 for video_id in fp.readlines():
+                    video_id = video_id.strip()
+                    if video_id in ['', '\n', '\n\n']:
+                        continue
                     video = Video(video_id=video_id)
                     qe = QueueElement(video=video)
                     self._list.append(qe)
@@ -97,5 +100,5 @@ class CyclicQueue:
         with open(k_DEFAULT_DISK_LOCATION, 'w') as fp:
             for qe in self._list:
                 if not qe.is_done:
-                    fp.write(qe.video.video_id)
+                    fp.write(qe.video.video_id + '\n')
         self._lock.release()
