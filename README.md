@@ -1,29 +1,25 @@
 # nico_crawler
 
-Download & convert niconico videos as mp3 
+- Download & convert nico videos as audio files.
+- Queue-based concurrent downloads (Up to 4 threads)
+- Failed downloads get added back to the end of the queue
 
 ## Prerequisite
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-deactivate
+./initial_setup.sh
 ```
 
 ## Usage
 
-### Individual download
 ```bash
-source venv/bin/activate
-pyton3 nico_crawler http://www.nicovideo.jp/watch/sm8059867
-deactivate
+./download.sh {url}
 ```
 
-### Bulk download
+where `url` is:
 
-```bash
-source venv/bin/activate
-pyton3 nico_crawler http://www.nicovideo.jp/mylist/48382005
-deactivate
-```
+|Type|Example|Description|Notes|
+|---|---|---|---|
+|video_id|`/sm12345678`|The video will be downloaded|
+|mylist|`/mylist/123456`|All videos in the list will be downloaded|
+|search|`/search/keyword`|- All _popular_ videos in the serach result will be downloaded.| Refer to `minimum_mylist` in [`config.json`](config.json) |

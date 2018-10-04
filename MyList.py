@@ -11,6 +11,9 @@ class MyList:
 
     @property
     def videos(self):
+
+        # TODO: what if there are multiple pages?
+
         r = requests.get(self.url)
         lines = str(r.text).split('\n')
         my_json = None
@@ -20,8 +23,6 @@ class MyList:
                 idx_start = line.find('[')
                 line = line[idx_start:-2]
                 my_json = json.loads(line)
-                # with open('mylist.json', 'w') as f:
-                #     json.dump(my_json, f)
 
         if not my_json:
             raise RuntimeError('Could not get data from {}'.format(self.url))

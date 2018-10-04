@@ -13,7 +13,14 @@ if __name__ == '__main__':
         raise FileNotFoundError(
             'config not found. Create a json file with the following details: download_location, email, password')
 
-    videos = MyList(url).videos if 'mylist' in url else [Video(url)]
+    if 'mylist' in url:
+        videos = MyList(url).videos
+    elif 'search' in url:
+        pass
+    else:
+        videos = [Video(url)]
+
+    # TODO thread pool ( 4 concurrent threads )
 
     for video in videos:
         log.info('Start {}'.format(video))

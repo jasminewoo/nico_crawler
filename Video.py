@@ -1,9 +1,5 @@
 import logging
 
-from nicotools.download import Video as NicoToolsVideo
-
-import global_config
-
 log = logging.getLogger(__name__)
 
 
@@ -21,16 +17,15 @@ class Video:
     def __str__(self):
         return '{} {}'.format(self.title, self.video_id) if self.title else self.video_id
 
-    def download(self):
+    def download(self, convert_to=None):
         if not self.is_available:
             log.info('Skip: the video was deleted {}'.format(self))
         if not self.video_id:
             raise AssertionError('self.video_id must be provided')
 
-        mail = global_config.instance['email']
-        password = global_config.instance['password']
+        # TODO: download video
 
-        video_ids = [self.video_id]
-        dir_path = global_config.instance['download_location']
-
-        NicoToolsVideo(video_ids, save_dir=dir_path, mail=mail, password=password).start()
+        if convert_to:
+            # TODO: convert to the specified ext
+            # TODO: delete original file (ie. mp4)
+            pass
