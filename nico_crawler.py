@@ -1,8 +1,7 @@
-import os
 import logging
+import os
 
-from MyList import MyList
-from Video import Video
+from app import App
 
 log = logging.getLogger(__name__)
 
@@ -13,20 +12,5 @@ if __name__ == '__main__':
         raise FileNotFoundError(
             'config not found. Create a json file with the following details: download_location, email, password')
 
-    if 'mylist' in url:
-        videos = MyList(url).videos
-    elif 'search' in url:
-        pass
-    else:
-        videos = [Video(url=url)]
-
-    # TODO thread pool ( 4 concurrent threads )
-
-    for video in videos:
-        log.info('Start {}'.format(video))
-        try:
-            video.download()
-            log.info('Done  {}'.format(video))
-        except Exception as e:
-            log.info('Fail  {}'.format(video))
-            log.exception(e)
+    app = App()
+    app.process(url)
