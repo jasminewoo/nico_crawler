@@ -96,5 +96,6 @@ class CyclicQueue:
             os.rename(k_DEFAULT_DISK_LOCATION, k_DEFAULT_DISK_LOCATION + '.bak')
         with open(k_DEFAULT_DISK_LOCATION, 'w') as fp:
             for qe in self._list:
-                fp.write(qe.video.video_id)
+                if not qe.is_done:
+                    fp.write(qe.video.video_id)
         self._lock.release()
