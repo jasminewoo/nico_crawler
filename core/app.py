@@ -1,22 +1,34 @@
 import logging
-import random
-import time
+import os
+from abc import ABCMeta, abstractmethod
 
-import global_config
+from core import global_config
 from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
 from core.mylist import MyList
+from core.repeated_timer import RepeatedTimer
 from core.search import Search
 from core.video import Video
 
 log = logging.getLogger(__name__)
 
 
-class App:
+class App(metaclass=ABCMeta):
     def __init__(self):
         self.queue = CyclicQueue()
+        self.threads = self.create_thread_pool()
 
-    def process(self, url):
+    def create_thread_pool(self):
+        threads = []
+        for i in range(global_config.instance['thread_count']):
+            threads.append(self.create_thread())
+        return threads
+
+    @abstractmethod
+    def create_thread(self):
+        pass
+
+    def _enqueue_url(self, url):
         if 'mylist' in url:
             videos = MyList(url=url).videos
         elif 'search' in url:
@@ -27,15 +39,42 @@ class App:
         for video in videos:
             self.queue.enqueue(video)
 
-        ct = global_config.instance['concurrent_threads']
-        threads = []
-        for i in range(ct):
-            t = DownloadThread(queue=self.queue, thread_number=i)
-            threads.append(t)
-            t.start()
 
-        for thread in threads:
+class AppSingleMode(App):
+    def __init__(self, url):
+        App.__init__(self)
+        self._process(url)
+
+    def create_thread(self):
+        return DownloadThread(queue=self.queue)
+
+    def _process(self, url):
+        self._enqueue_url(url)
+        for thread in self.threads:
+            thread.start()
+        self.wait_and_quit()
+
+    def wait_and_quit(self):
+        for thread in self.threads:
             thread.join()
+        self.queue.timer.stop()
 
-        # At this point there is nothing left on the queue
-        self.queue.stop_timer()
+
+class AppDaemonMode(App):
+    def __init__(self):
+        App.__init__(self)
+        for thread in self.threads:
+            thread.start()
+        self.detection_timer = RepeatedTimer(self.detect_new_requests)
+
+    def create_thread(self):
+        return DownloadThread(queue=self.queue, is_daemon=True)
+
+    def detect_new_requests(self):
+        for item in os.listdir('.'):
+            if not os.path.isfile(item):
+                continue
+            if item.lower().endswith('.request'):
+                with open(item, 'r') as fp:
+                    for line in fp.readlines():
+                        self._enqueue_url(line)
