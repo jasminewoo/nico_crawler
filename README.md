@@ -1,9 +1,9 @@
 # nico_crawler
 
 - Download & convert nico videos as audio files.
-- Queue-based concurrent downloads (Recommended: up to 4)
-- Failed downloads get added back to the end of the queue
-- The queue periodically gets written to the disk in case of application/system shutdown
+- Mutithread support (Recommended: 4 threads)
+- Failed downloads get added back to the end of the queue so they get tried again
+- The in-memory queue periodically gets written to the disk in case of application/system shutdown
 
 ## One-time Setup
 
@@ -31,12 +31,7 @@ where `url` is:
 nohup ./download.sh {url} &
 ```
 
-## Notes
-
-```bash
-url="..."
-youtube-dl -f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best' -o '~/Downloads/%(title)s-%(id)s.%(ext)s' -i -x $url
-```
+## Digital Ocean Setup (Ubuntu 18.04)
 
 ```bash
 # install pip3
