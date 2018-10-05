@@ -1,5 +1,7 @@
 # nico_crawler
 
+Python >= 3.6
+
 - Download & convert nico videos as audio files.
 - Mutithread support (Recommended: 4 threads)
 - Failed downloads get added back to the end of the queue so they get tried again
