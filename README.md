@@ -5,7 +5,7 @@
 - Failed downloads get added back to the end of the queue
 - The queue periodically gets written to the disk in case of application/system shutdown
 
-## Prerequisite
+## One-time Setup
 
 ```bash
 ./initial_setup.sh
