@@ -13,3 +13,6 @@ if __name__ == '__main__':
         AppSingleMode(url=sys.argv[1])
     else:
         AppDaemonMode()
+        log.info('Ready to process requests')
+
+    log.info('Exiting...')
