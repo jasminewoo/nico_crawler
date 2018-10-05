@@ -92,7 +92,7 @@ class CyclicQueue:
                 for video_id in fp.readlines():
                     if video_id == '':
                         continue
-                    video = Video(video_id=video_id)
+                    video = Video(video_id=video_id.strip('\n').strip())
                     qe = QueueElement(video=video)
                     self._list.append(qe)
 
