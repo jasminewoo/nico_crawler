@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import youtube_dl
 import logging
 
-import global_config
+from core import global_config
 
 logging.getLogger('youtube_dl').setLevel('CRITICAL')
 log = logging.getLogger(__name__)

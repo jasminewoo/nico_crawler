@@ -5,10 +5,10 @@ log = logging.getLogger(__name__)
 
 
 class DownloadThread(Thread):
-    def __init__(self, queue, thread_number=-1):
+    def __init__(self, queue, is_daemon=False):
         Thread.__init__(self)
         self.queue = queue
-        self.thread_number = thread_number
+        self.is_daemon = is_daemon
 
     def run(self):
         while True:
@@ -23,5 +23,6 @@ class DownloadThread(Thread):
                     self.queue.enqueue_again(video)
                     log.info('Failed:   {}'.format(video))
             else:
-                log.debug('This thread is out of work. Existing now...')
-                break
+                if not self.is_daemon:
+                    log.debug('This thread is out of work. Existing now...')
+                    break

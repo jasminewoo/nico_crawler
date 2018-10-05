@@ -1,5 +1,5 @@
 {
   "convert_to": "m4a",
   "minimum_mylist": 100,
-  "concurrent_threads": 4
+  "thread_count": 4
 }
