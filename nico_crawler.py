@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from core.app import App, AppSingleMode, AppDaemonMode
+from core.app import AppSingleMode, AppDaemonMode
 from core.logging_utils import config_logging
 
 log = logging.getLogger(__name__)
