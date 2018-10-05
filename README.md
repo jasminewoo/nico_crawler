@@ -1,7 +1,6 @@
 # nico_crawler
 
-Python >= 3.6
-
+- Python ≥ 3.6
 - Download & convert nico videos as audio files.
 - Mutithread support (Recommended: [4 threads](config.json))
 - Failed downloads get added back to the end of the queue so they get tried again
@@ -13,10 +12,12 @@ Python >= 3.6
 ./initial_setup.sh
 ```
 
-## Usage (Basic)
+## Usage
 
 ```bash
-./download.sh {url}
+./start.sh &  # This will start the daemon process and will look for *.request files
+
+echo $url > download_me.request
 ```
 
 where `url` is:
@@ -25,31 +26,9 @@ where `url` is:
 |---|---|---|---|
 |video_id|`.../sm12345678`|The video will be downloaded|
 |mylist|`.../mylist/123456`|All videos in the list will be downloaded|
-|search|`.../search/keyword`|All _popular_ videos in the serach result will be downloaded.| A _popular_ video needs to satisfy `mylist_count` > [`minimum_mylist`](config.json)|
+|search|`.../search/keyword`|All _popular_ videos in the serach result will be downloaded| A _popular_ video needs to satisfy `mylist_count` ≥ [`minimum_mylist`](config.json)|
 
-## Usage (Advanced)
-
-### Daemon Mode
-
-`nico_crawler` will run in daemon mode if you do not provide the url. While running in daemon mode, it will look for `*.request` files.
-
-```bash
-./download.sh
-echo ".../mylist/123456" > download_me.request
-echo ".../search/keyword" > me_too.request
-```
-
-### Running Remotely
-
-If you are downloading a large collection of videos, consider using `nico_crawler` remotely with `nohup`:
-
-```bash
-nohup ./download.sh {url} &
-```
-
-This will allow the download to continue even when your SSH session ends.
-
-
+Note: If you are downloading a large collection of videos, consider using it remotely with [nohup](https://linux.die.net/man/1/nohup).
 
 ## Digital Ocean Setup (Ubuntu 18.04)
 
