@@ -24,10 +24,10 @@ class DownloadThread(Thread):
                     success = False
                 if success:
                     self.queue.mark_as_done(video)
-                    log.info('Finished: {}'.format(video))
+                    log.info('Finished:      {}'.format(video))
                 else:
                     self.queue.enqueue_again(video)
-                    log.info('Failed:   {}'.format(video))
+                    log.info('Pending retry: {}'.format(video))
             else:
                 if not self.is_daemon:
                     log.debug('This thread is out of work. Existing now...')
