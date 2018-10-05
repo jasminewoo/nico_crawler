@@ -110,3 +110,5 @@ queue.txt.bak
 *.mp4
 *.part
 *.m4a
+*.mp3
+requests

@@ -71,11 +71,12 @@ class AppDaemonMode(App):
         return DownloadThread(queue=self.queue, is_daemon=True)
 
     def detect_new_requests(self):
-        for item in os.listdir('.'):
+        if not os.path.exists('requests'):
+            return
+        for item in os.listdir('requests'):
             if not os.path.isfile(item):
                 continue
-            if item.lower().endswith('.request'):
-                with open(item, 'r') as fp:
-                    for line in fp.readlines():
-                        self._enqueue_url(line)
-                os.remove(item)
+            with open(item, 'r') as fp:
+                for line in fp.readlines():
+                    self._enqueue_url(line)
+            os.remove(item)
