@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-from _ssl import SSLCertVerificationError
 from urllib.error import URLError
 
 import youtube_dl
@@ -40,7 +39,7 @@ class Video:
         ydl = youtube_dl.YoutubeDL(get_ydl_options())
         try:
             ret_code = ydl.download([self.url])
-        except (SSLCertVerificationError, URLError, ExtractorError, DownloadError) as e:
+        except (URLError, ExtractorError, DownloadError) as e:
             log.debug(e)
             raise RetriableError
 
