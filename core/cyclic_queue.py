@@ -2,6 +2,7 @@ import logging
 import os
 from multiprocessing import Lock
 
+from core import global_config
 from core.video import Video
 from core.repeated_timer import RepeatedTimer
 
@@ -14,6 +15,7 @@ class QueueElement:
     def __init__(self, video):
         self.video = video
         self.is_available = True
+        self.trials_remaining = global_config.instance['max_retry']
         self.is_done = False
 
 
@@ -44,7 +46,7 @@ class CyclicQueue:
 
         to_return = None
         for qe in self._list:
-            if qe.is_available and not qe.is_done:
+            if qe.is_available and qe.trials_remaining > 0 and not qe.is_done:
                 qe.is_available = False
                 to_return = qe.video
                 break
@@ -80,6 +82,7 @@ class CyclicQueue:
         if qe_to_enqueue_again:
             self._list.remove(qe_to_enqueue_again)
             qe_to_enqueue_again.is_available = True
+            qe_to_enqueue_again.trials_remaining -= 1
             self._list.append(qe_to_enqueue_again)
         else:
             log.warning('{} was not found in the queue'.format(video))
