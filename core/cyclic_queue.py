@@ -85,7 +85,7 @@ class CyclicQueue:
             qe_to_enqueue_again.trials_remaining -= 1
             self._list.append(qe_to_enqueue_again)
         else:
-            log.warning('{} was not found in the queue'.format(video))
+            log.debug('{} was not found in the queue'.format(video))
 
         self._lock.release()
 
