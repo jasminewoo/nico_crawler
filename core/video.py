@@ -65,7 +65,7 @@ class SilentLogger(object):
 def get_ydl_options():
     return {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'output': './downloads/%(title)s-%(id)s.%(ext)s',
+        'outtmpl': 'downloads/%(title)s-%(id)s.%(ext)s',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
