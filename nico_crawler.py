@@ -11,8 +11,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         AppSingleMode(url=sys.argv[1])
+        log.info('Exiting...')
     else:
         AppDaemonMode()
         log.info('Ready to process requests')
-
-    log.info('Exiting...')
