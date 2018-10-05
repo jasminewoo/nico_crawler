@@ -9,8 +9,6 @@ log = logging.getLogger(__name__)
 if __name__ == '__main__':
     config_logging()
 
-    app = App()
-
     if len(sys.argv) > 1:
         AppSingleMode(url=sys.argv[1])
     else:
