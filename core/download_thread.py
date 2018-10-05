@@ -1,4 +1,5 @@
 import logging
+import time
 from threading import Thread
 
 log = logging.getLogger(__name__)
@@ -26,3 +27,4 @@ class DownloadThread(Thread):
                 if not self.is_daemon:
                     log.debug('This thread is out of work. Existing now...')
                     break
+        time.sleep(1)
