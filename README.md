@@ -1,8 +1,7 @@
 # nico_crawler
 
 - Python ≥ 3.6
-- Download & convert nico videos as audio files.
-- Mutithread support (Recommended: [4 threads](config.json))
+- Download & convert nico videos as audio files in parallel
 - Failed downloads get added back to the end of the queue so they get tried again
 - The in-memory queue periodically gets written to the disk in case of application/system shutdown
 
