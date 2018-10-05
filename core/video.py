@@ -71,14 +71,8 @@ def get_ydl_options():
             'preferredcodec': global_config.instance['convert_to'],
             'preferredquality': '320',
         }],
-        'logger': SilentLogger(),
-        'progress_hooks': [my_hook],
+        'logger': SilentLogger()
     }
-
-
-def my_hook(d):
-    if d['status'] == 'finished':
-        log.debug('Done downloading, now converting ...')
 
 
 class RetriableError(Exception):
