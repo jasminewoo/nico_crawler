@@ -38,6 +38,7 @@ apt-get install software-properties-common
 apt-add-repository universe
 apt-get update
 apt-get install python3-pip
+apt-get install python3-venv
 
 # install tools
 curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
