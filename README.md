@@ -35,10 +35,8 @@ apt-get install python3-pip
 apt-get install python3-venv
 
 # install tools
-curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
-chmod a+rx /usr/local/bin/youtube-dl
-apt install ffmpeg
-apt install zip
+apt install ffmpeg   # For audio conversion
+apt install zip      # Only if you are zipping the audio files after
 
 # Clone code
 git clone https://github.com/lekordable/nico_crawler.git
