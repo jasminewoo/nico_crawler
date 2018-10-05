@@ -6,12 +6,6 @@
 - Failed downloads get added back to the end of the queue so they get tried again
 - The in-memory queue periodically gets written to the disk in case of application/system shutdown
 
-## One-time Setup
-
-```bash
-./initial_setup.sh
-```
-
 ## Usage
 
 ```bash
