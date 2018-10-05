@@ -11,9 +11,6 @@ class MyList:
 
     @property
     def videos(self):
-
-        # TODO: what if there are multiple pages?
-
         r = requests.get(self.url)
         lines = str(r.text).split('\n')
         my_json = None
