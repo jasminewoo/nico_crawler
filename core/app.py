@@ -11,6 +11,7 @@ from core.search import Search
 from core.video import Video
 
 log = logging.getLogger(__name__)
+k_REQUEST_FOLDER = './request'
 
 
 class App(metaclass=ABCMeta):
@@ -71,12 +72,13 @@ class AppDaemonMode(App):
         return DownloadThread(queue=self.queue, is_daemon=True)
 
     def detect_new_requests(self):
-        if not os.path.exists('requests'):
+        if not os.path.exists(k_REQUEST_FOLDER):
             return
-        for item in os.listdir('requests'):
-            if not os.path.isfile(item):
+        for item in os.listdir(k_REQUEST_FOLDER):
+            path = '{}/{}'.format(k_REQUEST_FOLDER, item)
+            if not os.path.isfile(path):
                 continue
-            with open(item, 'r') as fp:
+            with open(path, 'r') as fp:
                 for line in fp.readlines():
                     self._enqueue_url(line)
-            os.remove(item)
+            os.remove(path)
