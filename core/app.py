@@ -78,3 +78,4 @@ class AppDaemonMode(App):
                 with open(item, 'r') as fp:
                     for line in fp.readlines():
                         self._enqueue_url(line)
+                os.remove(item)
