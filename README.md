@@ -35,6 +35,14 @@ where `url` is:
 ./nico_crawler.sh kill
 ```
 
+### Auto-upload to Google Drive
+
+```bash
+./nico_crawler.sh gd
+```
+
+Note: This is a one-time configuration. 
+
 ## Digital Ocean Setup (Ubuntu 18.04)
 
 ```bash

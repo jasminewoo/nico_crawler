@@ -24,10 +24,9 @@ log = logging.getLogger(__name__)
 
 class GoogleDrive(StorageService):
     def __init__(self, config):
-        StorageService.__init__(self, config=config)
+        StorageService.__init__(self)
         self.service = None
         self.folder_id = config['google_drive_folder_id']
-        self.local_path = config['working_directory']
         self.initialize_service()
         self.lock = Lock()
 

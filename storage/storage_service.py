@@ -2,8 +2,8 @@ from abc import ABCMeta, abstractmethod
 
 
 class StorageService(metaclass=ABCMeta):
-    def __init__(self, config=None):
-        self.config = config
+    def __init__(self):
+        pass
 
     @abstractmethod
     def upload_file(self, name, path):

@@ -24,6 +24,11 @@ elif [ ${action} == "kill" ] ; then
     if [ ${pid} -ne 0 ]; then
         kill ${pid}
     fi
+elif [ ${action} == "gd" ] ; then
+    # TODO: get the user to authenticate
+    # TODO: create directory
+    # TODO : save to config_secret.json
+    echo "Coming soon...\n"
 else
-    echo "Not recognized action: ${action}"
+    echo "Not recognized action: ${action}\n"
 fi
