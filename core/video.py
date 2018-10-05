@@ -9,15 +9,10 @@ log = logging.getLogger(__name__)
 
 
 class Video:
-    def __init__(self, video_id=None, url=None, info=None):
-        self.title = None
-        self.is_available = True
+    def __init__(self, video_id=None, url=None):
+        self.video_id = None
         if url:
             self.video_id = url.split('/')[-1]
-        if info:
-            self.video_id = info['video_id']
-            self.title = info['title']
-            self.is_available = info['deleted'] == '0'
         if video_id:
             self.video_id = video_id
 

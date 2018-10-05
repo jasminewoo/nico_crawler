@@ -29,7 +29,7 @@ class MyList:
 
         vids = []
         for item in my_json:
-            v = Video(info=item['item_data'])
+            v = Video(video_id=item['item_data']['video_id'])
             vids.append(v)
 
         return vids
