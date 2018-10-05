@@ -9,6 +9,8 @@ from youtube_dl.utils import ExtractorError, DownloadError
 from core import global_config
 
 logging.getLogger('youtube_dl').setLevel('CRITICAL')
+logging.getLogger('urllib').setLevel('CRITICAL')
+
 log = logging.getLogger(__name__)
 
 
@@ -51,13 +53,13 @@ class Video:
 
 class SilentLogger(object):
     def debug(self, msg):
-        pass
+        log.debug(msg)
 
     def warning(self, msg):
-        pass
+        log.debug(msg)
 
     def error(self, msg):
-        log.error(msg)
+        log.debug(msg)
 
 
 def get_ydl_options():
