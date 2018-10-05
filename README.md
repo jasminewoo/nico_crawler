@@ -8,10 +8,18 @@
 
 ## Usage
 
-```bash
-./start.sh &  # This will start the daemon process and will look for *.request files
+### Start Daemon Process
 
-echo $url > download_me.request
+```bash
+./nico_crawler.sh start &
+```
+
+Note: If you are downloading a large collection of videos, consider using it remotely with [nohup](https://linux.die.net/man/1/nohup).
+
+### Download Videos
+
+```bash
+./nico_crawler.sh add ${url}
 ```
 
 where `url` is:
@@ -22,7 +30,11 @@ where `url` is:
 |mylist|`.../mylist/123456`|All videos in the list will be downloaded|
 |search|`.../search/keyword`|All _popular_ videos in the serach result will be downloaded| A _popular_ video needs to satisfy `mylist_count` ≥ [`minimum_mylist`](config.json)|
 
-Note: If you are downloading a large collection of videos, consider using it remotely with [nohup](https://linux.die.net/man/1/nohup).
+### Kill process
+
+```bash
+./nico_crawler.sh kill
+```
 
 ## Digital Ocean Setup (Ubuntu 18.04)
 
