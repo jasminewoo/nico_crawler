@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 source venv/bin/activate
-pyton3 nico_crawler.py $1
+python3 nico_crawler.py
 deactivate
