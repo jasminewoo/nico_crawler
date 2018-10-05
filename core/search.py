@@ -1,32 +1,47 @@
-# http://www.nicovideo.jp/search/sm7141460+歌ってみた?page=2&sort=m&order=d
+import re
 
 import requests
 
+from core import global_config
 from core.video import Video
+
+k_MYLIST_PATTERN = re.compile('(?<=<a href="/mylistcomment/)(.*?)">(.*?)(?=</a>)')
 
 
 class Search:
     def __init__(self, url):
-        self.url = url
+        self.url = url.split('?')[0]
 
     @property
     def videos(self):
+        break_now = False
+        for page in range(1, 99):
+            if break_now:
+                break
 
-        # TODO: what if there are multiple pages?
+            url = '{}?page={}&sort=m&order=d'.format(self.url, page)
+            r = requests.get(url)
+            links = str(r.text).split('<li class="item" data-video-item data-video-id="')
+            if len(links) == 1:
+                break
 
-        r = requests.get(self.url)
-        lines = str(r.text).split('\n')
-        my_json = None
-        for line in lines:
-            line = line.strip()
-            # TODO: identify video_id's in this search result.
+            vids = []
+            for link in links:
+                line_split = link.split('" data-nicoad-video')
+                video_id = line_split[0]
 
-        if not my_json:
-            raise RuntimeError('Could not get data from {}'.format(self.url))
+                if len(video_id) > 20:
+                    continue
 
-        vids = []
-        for item in my_json:
-            v = Video(info=item['item_data'])
-            vids.append(v)
+                if len(line_split) > 1:
+                    rest = line_split[1]
+                    pos = k_MYLIST_PATTERN.search(rest).regs[-1]
+                    mylist_count = int(rest[pos[0]:pos[1]].replace(',', ''))
+                    if mylist_count >= global_config.instance['minimum_mylist']:
+                        vid = Video(video_id=video_id)
+                        vids.append(vid)
+                    else:
+                        break_now = True
+                        break
 
         return vids
