@@ -112,3 +112,4 @@ queue.txt.bak
 *.m4a
 *.mp3
 requests
+nohup.out
