@@ -66,7 +66,7 @@ def get_ydl_options():
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'm4a',
+            'preferredcodec': global_config.instance['convert_to'],
             'preferredquality': '320',
         }],
         'logger': SilentLogger(),
