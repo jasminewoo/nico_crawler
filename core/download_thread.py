@@ -2,6 +2,8 @@ import logging
 import time
 from threading import Thread
 
+from core.video import RetriableError
+
 log = logging.getLogger(__name__)
 
 
@@ -16,7 +18,10 @@ class DownloadThread(Thread):
             video = self.queue.peek_and_reserve()
             if video:
                 log.debug('Starting to process {}'.format(video))
-                success = video.download()
+                try:
+                    success = video.download()
+                except RetriableError:
+                    success = False
                 if success:
                     self.queue.mark_as_done(video)
                     log.info('Finished: {}'.format(video))

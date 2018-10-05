@@ -1,6 +1,11 @@
 from __future__ import unicode_literals
-import youtube_dl
+
 import logging
+from _ssl import SSLCertVerificationError
+from urllib.error import URLError
+
+import youtube_dl
+from youtube_dl.utils import ExtractorError, DownloadError
 
 from core import global_config
 
@@ -33,11 +38,13 @@ class Video:
         is_successful = False
 
         ydl = youtube_dl.YoutubeDL(get_ydl_options())
-        ret_code = ydl.download([self.url])
+        try:
+            ret_code = ydl.download([self.url])
+        except (SSLCertVerificationError, URLError, ExtractorError, DownloadError) as e:
+            log.debug(e)
+            raise RetriableError
 
         if ret_code == 0:
-            convert_to = global_config.instance['convert_to']
-            # TODO: convert
             is_successful = True
 
         return is_successful
@@ -70,3 +77,7 @@ def get_ydl_options():
 def my_hook(d):
     if d['status'] == 'finished':
         log.debug('Done downloading, now converting ...')
+
+
+class RetriableError(Exception):
+    pass
