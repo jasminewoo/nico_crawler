@@ -11,7 +11,7 @@ from core.search import Search
 from core.video import Video
 
 log = logging.getLogger(__name__)
-k_REQUEST_FOLDER = './request'
+k_REQUEST_FOLDER = './requests'
 
 
 class App(metaclass=ABCMeta):
