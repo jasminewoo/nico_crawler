@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import time
 from threading import Thread
 from urllib.error import URLError
@@ -14,6 +15,8 @@ logging.getLogger('youtube_dl').setLevel('CRITICAL')
 logging.getLogger('urllib').setLevel('CRITICAL')
 
 log = logging.getLogger(__name__)
+
+k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 
 class DownloadThread(Thread):
@@ -29,7 +32,7 @@ class DownloadThread(Thread):
             if video:
                 log.debug('Starting to process {}'.format(video))
                 try:
-                    success = video.download()
+                    success = self.download(video=video)
                 except RetriableError:
                     success = False
                 if success:
@@ -57,11 +60,17 @@ class DownloadThread(Thread):
             log.debug(e)
             raise RetriableError
 
+        filename = get_filename_by_video_id(video_id=video.video_id)
+        if filename:
+            path = '{}/{}'.format(k_DOWNLOADS_FOLDER_PATH, filename)
+
         if ret_code == 0:
             if self.storage:
-                pass
-                # TODO google drive here
+                self.storage.upload_file(filename, path)
             is_successful = True
+
+        if filename:
+            os.remove(path)
 
         return is_successful
 
@@ -77,10 +86,14 @@ class SilentLogger(object):
         log.debug(msg)
 
 
+class RetriableError(Exception):
+    pass
+
+
 def get_ydl_options():
     return {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': 'downloads/%(title)s-%(id)s.%(ext)s',
+        'outtmpl': '{}/%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
@@ -90,5 +103,9 @@ def get_ydl_options():
     }
 
 
-class RetriableError(Exception):
-    pass
+def get_filename_by_video_id(video_id):
+    files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
+    filtered_list = list(filter(lambda f: f.contains(video_id), files))
+    if filtered_list and len(filtered_list) > 0:
+        return filtered_list[0]
+    return None
