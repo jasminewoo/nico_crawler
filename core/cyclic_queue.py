@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 from multiprocessing import Lock
 
 from core import global_config
@@ -14,6 +15,7 @@ class QueueElement:
         self.is_available = True
         self.trials_remaining = global_config.instance['max_retry']
         self.is_done = False
+        self.next_trial_timestamp = datetime.utcnow()
 
 
 class CyclicQueue:
@@ -48,7 +50,9 @@ class CyclicQueue:
 
         to_return = None
         for qe in self._list:
-            if qe.is_available and qe.trials_remaining > 0 and not qe.is_done:
+            is_free = qe.is_available and not qe.is_done
+            can_try = qe.trials_remaining > 0 and qe.next_trial_timestamp < datetime.utcnow()
+            if is_free and can_try:
                 qe.is_available = False
                 to_return = qe.video
                 break
@@ -59,26 +63,38 @@ class CyclicQueue:
 
     def mark_as_done(self, video):
         self._lock.acquire()
+        qe = self.get_qe_by_video_id(video.video_id)
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_DONE)
+        qe.is_done = True
+        self._lock.release()
 
-        for qe in self._list:
-            if qe.video.video_id == video.video_id:
-                self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_DONE)
-                qe.is_done = True
-                break
+    def mark_as_errored(self, video):
+        self._lock.acquire()
+        qe = self.get_qe_by_video_id(video.video_id)
+        qe.trials_remaining = 0
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_ERRORED)
+        self._lock.release()
 
+    def stop_retrying(self, video):
+        self._lock.acquire()
+        qe = self.get_qe_by_video_id(video.video_id)
+        qe.trials_remaining = 0
         self._lock.release()
 
     def enqueue_again(self, video):
         self._lock.acquire()
 
-        match_list = list(filter(lambda qe: qe.video.video_id == video.video_id, self._list))
-        if len(match_list) > 0:
-            qe = match_list[0]
-            self._list.remove(qe)
-            qe.is_available = True
-            qe.trials_remaining -= 1
-            self._list.append(qe)
-        else:
-            log.debug('{} was not found in the queue'.format(video))
+        qe = self.get_qe_by_video_id(video.video_id)
+        self._list.remove(qe)
+        qe.is_available = True
+        qe.trials_remaining -= 1
+        qe.next_trial_timestamp += timedelta(seconds=global_config.instance['retry_interval_in_seconds'])
+        if qe.trials_remaining == 0:
+            self.indexer.set_status(video_id=qe.video.video_id, status=Indexer.k_STATUS_ERRORED)
+        self._list.append(qe)
 
         self._lock.release()
+
+    def get_qe_by_video_id(self, video_id):
+        match_list = list(filter(lambda qe: qe.video.video_id == video_id, self._list))
+        return match_list[0] if len(match_list) > 0 else None

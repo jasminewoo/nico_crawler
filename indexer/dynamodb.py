@@ -1,3 +1,5 @@
+from datetime import datetime, tzinfo, timedelta
+
 from boto3.dynamodb.conditions import Key
 
 from indexer.indexer_service import Indexer
@@ -6,6 +8,11 @@ import boto3
 import logging
 
 log = logging.getLogger(__name__)
+
+k_VIDEO_ID = 'video_id'
+k_VIDEO_STATUS = 'video_status'
+k_TRIALS_REMAINING = 'trials_remaining'
+k_LAST_MODIFIED_UTC = 'last_modified_utc'
 
 
 class DynamoDbIndexer(Indexer):
@@ -24,39 +31,42 @@ class DynamoDbIndexer(Indexer):
 
         response = self.table.query(
             IndexName='video_status-index',
-            KeyConditionExpression=Key('video_status').eq(self.k_STATUS_PENDING)
+            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(self.k_STATUS_PENDING)
         )
 
         if 'Items' in response:
             for item in response['Items']:
-                video_ids.append(item['video_id'])
+                video_ids.append(item[k_VIDEO_ID])
 
         return video_ids
+
+    def get_status(self, video_id):
+        item = self._get_item(video_id=video_id)
+        return item[k_VIDEO_STATUS] if item else self.k_STATUS_NOT_FOUND
+
+    def set_status(self, video_id, status):
+        self._update_by_video_id(video_id=video_id, key=k_VIDEO_STATUS, value=status)
+
+    def set_trials_remaining(self, video_id, trials_remaining):
+        self._update_by_video_id(video_id=video_id, key=k_TRIALS_REMAINING, value=trials_remaining)
 
     def _get_item(self, video_id):
         response = self.table.get_item(
             Key={
-                'video_id': video_id
+                k_VIDEO_ID: video_id
             }
         )
         return response['Item'] if 'Item' in response else None
 
-    def get_status(self, video_id):
-        item = self._get_item(video_id=video_id)
-        if item:
-            # If the item is there, then it's done.
-            return self.k_STATUS_DONE
-        else:
-            return self.k_STATUS_NOT_FOUND
-
-    def set_status(self, video_id, status):
+    def _update_by_video_id(self, video_id, key, value):
         self.table.update_item(
             Key={
-                'video_id': video_id
+                k_VIDEO_ID: video_id
             },
-            UpdateExpression="set video_status = :s",
+            UpdateExpression="set {}=:m, {}=:v".format(k_LAST_MODIFIED_UTC, key),
             ExpressionAttributeValues={
-                ':s': status
+                ':v': value,
+                ':m': utcnow_in_string()
             },
             ReturnValues="UPDATED_NEW"
         )
@@ -65,3 +75,18 @@ class DynamoDbIndexer(Indexer):
         # video_status-index
         # read/write capacity 1
         pass
+
+
+class SimpleUTC(tzinfo):
+    def tzname(self, **kwargs):
+        return "UTC"
+
+    def utcoffset(self, dt):
+        return timedelta(0)
+
+
+def utcnow_in_string():
+    d = datetime.utcnow()
+    d = d.replace(tzinfo=SimpleUTC()).isoformat()
+    d = str(d).replace('+00:00', 'Z')
+    return d

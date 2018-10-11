@@ -32,15 +32,15 @@ class DownloadThread(Thread):
             if video:
                 log.debug('Starting to process {}'.format(video))
                 try:
-                    success = self.download(video=video)
-                except RetriableError:
-                    success = False
-                if success:
+                    self.download(video=video)
                     self.queue.mark_as_done(video)
                     log.info('Finished:      {}'.format(video))
-                else:
+                except RetriableError:
                     self.queue.enqueue_again(video)
                     log.info('Pending retry: {}'.format(video))
+                except LogInError:
+                    self.queue.mark_as_errored(video)
+                    log.info('LogInError:    {}'.format(video))
             else:
                 if not self.is_daemon:
                     log.debug('This thread is out of work. Existing now...')
@@ -48,16 +48,15 @@ class DownloadThread(Thread):
         time.sleep(1)
 
     def download(self, video):
-        if not video.video_id:
-            raise AssertionError('self.video_id must be provided')
-
-        is_successful = False
+        ret_code = -1
 
         ydl = youtube_dl.YoutubeDL(get_ydl_options())
         try:
             ret_code = ydl.download([video.url])
         except (URLError, ExtractorError, DownloadError) as e:
             log.debug(e)
+            if 'Niconico videos now require logging in' in str(e):
+                raise LogInError
             raise RetriableError
 
         filename = get_filename_by_video_id(video_id=video.video_id)
@@ -67,12 +66,12 @@ class DownloadThread(Thread):
         if ret_code == 0:
             if self.storage:
                 self.storage.upload_file(filename, path)
-            is_successful = True
 
         if self.storage and filename:
             os.remove(path)
 
-        return is_successful
+        if ret_code != 0:
+            raise RetriableError
 
 
 class SilentLogger(object):
@@ -90,10 +89,14 @@ class RetriableError(Exception):
     pass
 
 
+class LogInError(Exception):
+    pass
+
+
 def get_ydl_options():
     return {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': '{}/%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
+        'outtmpl': '{}/%(upload_date)-s%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
