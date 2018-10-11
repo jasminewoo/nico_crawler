@@ -10,6 +10,8 @@ from core.mylist import MyList
 from core.repeated_timer import RepeatedTimer
 from core.search import Search
 from core.video import Video
+from indexer.dynamodb import DynamoDbIndexer
+from indexer.local import LocalIndexer
 from storage.google_drive import GoogleDrive
 
 log = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ k_SECRET_CONFIG_FILENAME = 'config_secret.json'
 
 class App(metaclass=ABCMeta):
     def __init__(self):
-        self.queue = CyclicQueue()
+        self.queue = CyclicQueue(indexer=_get_indexer())
         self.storage = _get_storage()
         self.threads = self.create_thread_pool()
 
@@ -100,3 +102,15 @@ def _get_storage():
     log.info('Initialized storage object with default settings')
     return storage
 
+
+def _get_indexer():
+    indexer = LocalIndexer()
+    aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
+    if os.path.exists(k_SECRET_CONFIG_FILENAME):
+        with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
+            config = json.load(fp)
+            for field in aws_required_fields:
+                if field not in config:
+                    return indexer
+            return DynamoDbIndexer(config=config)
+    return indexer
