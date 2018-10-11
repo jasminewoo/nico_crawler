@@ -4,7 +4,7 @@ class Video:
             raise AssertionError('Need one of video_id and url')
 
         if url:
-            self.video_id = url.split('/')[-1]
+            self.video_id = url.split('/')[-1].split('?')[0]
         if video_id:
             self.video_id = video_id
         self.title = title
