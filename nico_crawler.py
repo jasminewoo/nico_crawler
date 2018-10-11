@@ -10,8 +10,10 @@ if __name__ == '__main__':
     config_logging()
 
     if len(sys.argv) > 1:
+        log.info('AppSingleMode')
         AppSingleMode(url=sys.argv[1])
         log.info('Exiting...')
     else:
+        log.info('AppDaemonMode')
         AppDaemonMode()
         log.info('Ready to process requests')

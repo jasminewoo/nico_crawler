@@ -114,3 +114,5 @@ queue.txt.bak
 requests
 nohup.out
 downloads
+config_secret.json
+token.json

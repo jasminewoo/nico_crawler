@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from abc import ABCMeta, abstractmethod
@@ -9,14 +10,19 @@ from core.mylist import MyList
 from core.repeated_timer import RepeatedTimer
 from core.search import Search
 from core.video import Video
+from indexer.dynamodb import DynamoDbIndexer
+from indexer.local import LocalIndexer
+from storage.google_drive import GoogleDrive
 
 log = logging.getLogger(__name__)
 k_REQUEST_FOLDER = './requests'
+k_SECRET_CONFIG_FILENAME = 'config_secret.json'
 
 
 class App(metaclass=ABCMeta):
     def __init__(self):
-        self.queue = CyclicQueue()
+        self.queue = CyclicQueue(indexer=_get_indexer())
+        self.storage = _get_storage()
         self.threads = self.create_thread_pool()
 
     def create_thread_pool(self):
@@ -47,7 +53,7 @@ class AppSingleMode(App):
         self._process(url)
 
     def create_thread(self):
-        return DownloadThread(queue=self.queue)
+        return DownloadThread(queue=self.queue, storage=self.storage)
 
     def _process(self, url):
         self._enqueue_url(url)
@@ -69,7 +75,7 @@ class AppDaemonMode(App):
         self.detection_timer = RepeatedTimer(self.detect_new_requests)
 
     def create_thread(self):
-        return DownloadThread(queue=self.queue, is_daemon=True)
+        return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True)
 
     def detect_new_requests(self):
         if not os.path.exists(k_REQUEST_FOLDER):
@@ -82,3 +88,29 @@ class AppDaemonMode(App):
                 for line in fp.readlines():
                     self._enqueue_url(line)
             os.remove(path)
+
+
+def _get_storage():
+    if os.path.exists(k_SECRET_CONFIG_FILENAME):
+        with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
+            config = json.load(fp)
+            if 'google_drive_folder_id' in config:
+                storage = GoogleDrive(config=config)
+                log.info('Initialized storage object with config')
+                return storage
+    storage = GoogleDrive()
+    log.info('Initialized storage object with default settings')
+    return storage
+
+
+def _get_indexer():
+    indexer = LocalIndexer()
+    aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
+    if os.path.exists(k_SECRET_CONFIG_FILENAME):
+        with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
+            config = json.load(fp)
+            for field in aws_required_fields:
+                if field not in config:
+                    return indexer
+            return DynamoDbIndexer(config=config)
+    return indexer
