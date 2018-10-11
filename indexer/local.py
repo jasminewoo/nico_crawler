@@ -16,21 +16,25 @@ class LocalIndexer(Indexer):
         self._lock = Lock()
 
     def load_from_disk(self):
-        if os.path.exists(k_DEFAULT_DISK_LOCATION):
-            with open(k_DEFAULT_DISK_LOCATION, 'r') as fp:
-                for line in fp.readlines():
-                    if line == '':
-                        continue
-                    line_split = line.split(',')
-                    video_id = line_split[0].strip('\n').strip()
-                    status = line_split[1] if len(line_split) > 1 else self.k_STATUS_PENDING
-                    self.map[video_id] = status
+        # if os.path.exists(k_DEFAULT_DISK_LOCATION):
+        #     with open(k_DEFAULT_DISK_LOCATION, 'r') as fp:
+        #         for line in fp.readlines():
+        #             if line == '':
+        #                 continue
+        #             line_split = line.split(',')
+        #             video_id = line_split[0].strip('\n').strip()
+        #             status = line_split[1] if len(line_split) > 1 else self.k_STATUS_PENDING
+        #             self.map[video_id] = status
+        pass
 
     def get_pending_video_ids(self):
         return list(filter(lambda video_id: map['video_id'] == self.k_STATUS_PENDING, self.map))
 
     def get_status(self, video_id):
         return self.map[video_id] if video_id in self.map else self.k_STATUS_NOT_FOUND
+
+    def set_trials_remaining(self, video_id, trials_remaining):
+        pass
 
     def set_status(self, video_id, status):
         self._lock.acquire()
