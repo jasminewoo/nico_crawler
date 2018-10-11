@@ -69,7 +69,7 @@ class DownloadThread(Thread):
                 self.storage.upload_file(filename, path)
             is_successful = True
 
-        if filename:
+        if self.storage and filename:
             os.remove(path)
 
         return is_successful
