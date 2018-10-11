@@ -25,10 +25,10 @@ log = logging.getLogger(__name__)
 class GoogleDrive(StorageService):
     def __init__(self, config):
         StorageService.__init__(self)
+        self.lock = Lock()
         self.service = None
         self.folder_id = config['google_drive_folder_id']
         self.initialize_service()
-        self.lock = Lock()
 
     def update_with_file(self, key, path):
         self._upload(is_new_entity=False, key=key, path=path)
