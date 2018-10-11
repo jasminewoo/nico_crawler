@@ -92,5 +92,7 @@ def _get_storage():
     if os.path.exists(k_SECRET_CONFIG_FILENAME):
         with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
             config = json.load(fp)
-            return GoogleDrive(config=config)
+            storage = GoogleDrive(config=config)
+            log.info('Initialized storage object')
+            return storage
     return None
