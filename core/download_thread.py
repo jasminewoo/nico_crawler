@@ -39,7 +39,7 @@ class DownloadThread(Thread):
                     self.queue.enqueue_again(video)
                     log.info('Pending retry: {}'.format(video))
                 except LogInError:
-                    self.queue.mark_as_errored(video)
+                    self.queue.stop_retrying(video)
                     log.info('LogInError:    {}'.format(video))
             else:
                 if not self.is_daemon:
