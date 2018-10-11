@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from multiprocessing import Lock
 
 from core import global_config
+from core.mylist import MyList
+from core.search import Search
 from core.video import Video
 from indexer.indexer_service import Indexer
 
@@ -32,17 +34,29 @@ class CyclicQueue:
             qe = QueueElement(video=video)
             self._list.append(qe)
 
-    def enqueue(self, video):
-        self._lock.acquire()
+    def enqueue(self, video=None, url=None):
+        if (1 if video else 0) + (1 if url else 0) != 1:
+            AssertionError('Only one parameter allowed')
 
-        exists = self.indexer.exists(video_id=video.video_id)
-        if not exists:
-            self._list.append(QueueElement(video))
-            self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
-            log.info('Enqueued:  {}'.format(video.video_id))
+        if url:
+            if 'mylist' in url:
+                videos = MyList(url=url).videos
+            elif 'search' in url:
+                videos = Search(url=url).videos
+            else:
+                videos = [Video(url=url)]
         else:
-            log.info('Duplicate: {}'.format(video.video_id))
+            videos = [video]
 
+        self._lock.acquire()
+        for video in videos:
+            exists = self.indexer.exists(video_id=video.video_id)
+            if not exists:
+                self._list.append(QueueElement(video))
+                self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
+                log.info('Enqueued:  {}'.format(video.video_id))
+            else:
+                log.info('Duplicate: {}'.format(video.video_id))
         self._lock.release()
 
     def peek_and_reserve(self):

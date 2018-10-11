@@ -20,11 +20,12 @@ k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 
 class DownloadThread(Thread):
-    def __init__(self, queue, storage=None, is_daemon=False):
+    def __init__(self, queue, storage=None, is_daemon=False, is_crawl=False):
         Thread.__init__(self)
         self.queue = queue
         self.storage = storage
         self.is_daemon = is_daemon
+        self.is_crawl = is_crawl
 
     def run(self):
         while True:
@@ -35,6 +36,8 @@ class DownloadThread(Thread):
                     self.download(video=video)
                     self.queue.mark_as_done(video)
                     log.info('Finished:      {}'.format(video))
+                    if self.is_crawl:
+                        pass
                 except RetriableError:
                     self.queue.enqueue_again(video)
                     log.info('Pending retry: {}'.format(video))

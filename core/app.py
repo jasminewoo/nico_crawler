@@ -35,17 +35,6 @@ class App(metaclass=ABCMeta):
     def create_thread(self):
         pass
 
-    def _enqueue_url(self, url):
-        if 'mylist' in url:
-            videos = MyList(url=url).videos
-        elif 'search' in url:
-            videos = Search(url=url).videos
-        else:
-            videos = [Video(url=url)]
-
-        for video in videos:
-            self.queue.enqueue(video)
-
 
 class AppSingleMode(App):
     def __init__(self, url):
@@ -56,7 +45,7 @@ class AppSingleMode(App):
         return DownloadThread(queue=self.queue, storage=self.storage)
 
     def _process(self, url):
-        self._enqueue_url(url)
+        self.queue.enqueue(url=url)
         for thread in self.threads:
             thread.start()
         self.wait_and_quit()
@@ -75,7 +64,7 @@ class AppDaemonMode(App):
         self.detection_timer = RepeatedTimer(self.detect_new_requests)
 
     def create_thread(self):
-        return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True)
+        return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True, is_crawl=True)
 
     def detect_new_requests(self):
         if not os.path.exists(k_REQUEST_FOLDER):
@@ -86,7 +75,7 @@ class AppDaemonMode(App):
                 continue
             with open(path, 'r') as fp:
                 for line in fp.readlines():
-                    self._enqueue_url(line)
+                    self.queue.enqueue(url=line)
             os.remove(path)
 
 
