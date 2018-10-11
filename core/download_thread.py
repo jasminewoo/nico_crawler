@@ -105,7 +105,7 @@ def get_ydl_options():
 
 def get_filename_by_video_id(video_id):
     files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
-    filtered_list = list(filter(lambda f: f.contains(video_id), files))
+    filtered_list = list(filter(lambda f: video_id in f, files))
     if filtered_list and len(filtered_list) > 0:
         return filtered_list[0]
     return None
