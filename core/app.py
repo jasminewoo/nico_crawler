@@ -95,4 +95,8 @@ def _get_storage():
             storage = GoogleDrive(config=config)
             log.info('Initialized storage object')
             return storage
+    else:
+        storage = GoogleDrive()
+        log.info('Initialized storage object')
+        return storage
     return None

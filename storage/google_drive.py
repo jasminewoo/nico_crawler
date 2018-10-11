@@ -27,7 +27,9 @@ class GoogleDrive(StorageService):
         StorageService.__init__(self)
         self.lock = Lock()
         self.service = None
-        self.folder_id = config['google_drive_folder_id']
+        self.folder_id = None
+        if config:
+            self.folder_id = config['google_drive_folder_id']
         self.initialize_service()
 
     def update_with_file(self, key, path):
@@ -91,7 +93,9 @@ class GoogleDrive(StorageService):
         try:
             self.lock.acquire()
             if is_new_entity:
-                metadata = {'name': name, 'parents': [self.folder_id]}
+                metadata = {'name': name}
+                if self.folder_id:
+                    metadata['parents'] = [self.folder_id]
                 file = self.service.files().create(body=metadata, media_body=media, fields='id').execute()
             else:
                 file = self.service.files().update(media_body=media, fileId=key, fields='id').execute()
