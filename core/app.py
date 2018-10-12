@@ -55,7 +55,8 @@ class AppDaemonMode(App):
         App.__init__(self)
         for thread in self.threads:
             thread.start()
-        self.detection_timer = RepeatedTimer(self.detect_new_requests)
+        self.detection_timer = RepeatedTimer(1, self.detect_new_requests)  # every second
+        self.daily_trend_timer = RepeatedTimer(43200, self.explore_daily_trending_videos)  # every 12 hours
 
     def create_thread(self):
         return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True, is_crawl=True)
@@ -71,6 +72,9 @@ class AppDaemonMode(App):
                 for line in fp.readlines():
                     self.queue.enqueue(url=line)
             os.remove(path)
+
+    def explore_daily_trending_videos(self):
+        self.queue.enqueue(url='https://www.nicovideo.jp/ranking/fav/daily/sing')
 
 
 def _get_storage():

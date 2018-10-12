@@ -32,16 +32,14 @@ class DownloadThread(Thread):
             if video:
                 log.debug('Starting to process {}'.format(video))
                 try:
+                    if self.is_crawl:
+                        self.enqueue_related_videos(video=video)
                     vt = video.video_type
                     if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
                         self.download(video=video)
                         self.queue.mark_as_done(video)
                         log.info('Finished:      {}'.format(video))
-                        if self.is_crawl:
-                            self.enqueue_related_videos(video=video)
                     else:
-                        if self.is_crawl:
-                            self.enqueue_related_videos(video=video)
                         self.queue.mark_as_referenced(video)
                         log.info('Referenced:    {}'.format(video))
                 except RetriableError:

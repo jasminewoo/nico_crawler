@@ -1,7 +1,5 @@
-import os
 from multiprocessing import Lock
 
-from core.repeated_timer import RepeatedTimer
 from indexer.indexer_service import Indexer
 
 k_DEFAULT_DISK_LOCATION = 'queue.txt'

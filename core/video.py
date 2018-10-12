@@ -1,8 +1,7 @@
-import requests
 import logging
-import html
+import re
 
-from youtube_dl import YoutubeDL
+import requests
 
 logging.getLogger('urllib3').setLevel('CRITICAL')
 logging.getLogger('youtube-dl').setLevel('CRITICAL')
@@ -23,17 +22,21 @@ class Video:
             self.video_id = video_id
         self._html = None
         self.requires_creds = False
-        self._info_dict = None
 
     def get_related_urls(self):
         urls = []
         vt = self.video_type
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
-            # TODO think about the logic...
-            pass
+            desc = self.description
+            matches = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', desc)
+            for url in matches:
+                if 'nicovideo' not in url:
+                    continue
+                if '/watch/' in url or '/mylist/' in url:
+                    urls.append(url)
         else:
             search_template = 'https://www.nicovideo.jp/search/{}%20%E6%AD%8C%E3%81%A3%E3%81%A6%E3%81%BF%E3%81%9F'
-            urls = [search_template.format(self.video_id)]
+            urls.append(search_template.format(self.video_id))
 
         return urls
 
@@ -53,14 +56,15 @@ class Video:
 
     @property
     def description(self):
-        lines = self.html.split('\n')
-        for line in lines:
-            line = line.strip().strip('\t').strip()
-            if line.startswith('<meta itemprop="description"'):
-                idx_start = len('<meta itemprop="description" content="')
-                description_html = line[idx_start:].replace('" />', '').replace('"/>', '')
-                description_str = html.unescape(description_html)
-                break
+        tag1 = '<meta itemprop="description" content="'
+        tag2 = '<p class="VideoDescription-text" itemprop="description">'
+
+        if tag2 in self.html:
+            idx_start = self.html.index(tag1) + len(tag1)
+            idx_end = self.html.index('\n', idx_start) - len('</p>')
+            return self.html[idx_start:idx_end]
+        else:
+            log.debug('{} has no description'.format(self.video_id))
 
     @property
     def mylist(self):

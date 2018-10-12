@@ -1,4 +1,5 @@
 from core.mylist import MyList
+from core.ranking import Ranking
 from core.search import Search
 from core.video import Video
 
@@ -10,6 +11,8 @@ class NicoObjectFactory:
             self.nico_object = MyList(url=url)
         elif 'search' in url:
             self.nico_object = Search(url=url)
+        elif 'ranking' in url:
+            self.nico_object = Ranking(url=url)
         else:
             self.nico_object = Video(url=url)
 
