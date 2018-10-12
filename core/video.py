@@ -1,3 +1,5 @@
+import html as html_lib
+import json
 import logging
 import re
 
@@ -6,7 +8,7 @@ import requests
 logging.getLogger('urllib3').setLevel('CRITICAL')
 logging.getLogger('youtube-dl').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
-
+url_regex_str='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 class Video:
     k_VIDEO_TYPE_UTATTEMITA = 'utattemita'
@@ -21,6 +23,7 @@ class Video:
         if video_id:
             self.video_id = video_id
         self._html = None
+        self._video_json = None
         self.requires_creds = False
 
     def get_related_urls(self):
@@ -28,7 +31,7 @@ class Video:
         vt = self.video_type
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
             desc = self.description
-            matches = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', desc)
+            matches = re.findall(url_regex_str, desc)
             for url in matches:
                 if 'nicovideo' not in url:
                     continue
@@ -46,7 +49,7 @@ class Video:
 
     @property
     def video_type(self):
-        tags = self.get_tags()
+        tags = self.tags
         if '歌ってみた' in tags:
             return self.k_VIDEO_TYPE_UTATTEMITA
         elif 'VOCALIOD' in tags:
@@ -56,11 +59,13 @@ class Video:
 
     @property
     def description(self):
-        tag1 = '<meta itemprop="description" content="'
-        tag2 = '<p class="VideoDescription-text" itemprop="description">'
+        if self.video_json:
+            return self.video_json['video']['description']
 
+        #tag1 = '<meta itemprop="description" content="'
+        tag2 = '<p class="VideoDescription-text" itemprop="description">'
         if tag2 in self.html:
-            idx_start = self.html.index(tag1) + len(tag1)
+            idx_start = self.html.index(tag2) + len(tag2)
             idx_end = self.html.index('\n', idx_start) - len('</p>')
             return self.html[idx_start:idx_end]
         else:
@@ -68,6 +73,9 @@ class Video:
 
     @property
     def mylist(self):
+        if self.video_json:
+            return self.video_json['video']['mylistCount']
+
         if 'mylistCount' in self.html:
             idx_start = self.html.index('mylistCount')
             idx_start = self.html.index(':', idx_start)
@@ -86,10 +94,26 @@ class Video:
     def html(self):
         if not self._html:
             r = requests.get(self.url)
-            self._html = str(r.text)
+            self._html = html_lib.unescape(str(r.text))
         return self._html
 
-    def get_tags(self):
+    @property
+    def video_json(self):
+        if not self._video_json:
+            if self.html:
+                for line in self.html.split('\n'):
+                    json_tag = '<div id="js-initial-watch-data"'
+                    if json_tag in line:
+                        idx_start = line.index('data-api-data="') + len('data-api-data="')
+                        idx_end = line.index('" data-environment', idx_start)
+                        self._video_json = json.loads(line[idx_start:idx_end])
+        return self._video_json
+
+    @property
+    def tags(self):
+        if self.video_json:
+            return list(map(lambda x: x['name'], self.video_json['tags']))
+
         lines = self.html.split('\n')
         for line in lines:
             line = line.strip().strip('\t').strip()
