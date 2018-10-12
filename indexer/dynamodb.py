@@ -8,6 +8,8 @@ import boto3
 import logging
 
 logging.getLogger('boto').setLevel('CRITICAL')
+logging.getLogger('boto3').setLevel('CRITICAL')
+logging.getLogger('botocore').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
 
 k_VIDEO_ID = 'video_id'
