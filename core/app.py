@@ -74,6 +74,7 @@ class AppDaemonMode(App):
             os.remove(path)
 
     def explore_daily_trending_videos(self):
+        log.info('Enqueuing daily trends...')
         self.queue.enqueue(url='https://www.nicovideo.jp/ranking/fav/daily/sing')
 
 
