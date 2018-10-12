@@ -15,6 +15,7 @@ class Search:
     @property
     def videos(self):
         break_now = False
+        vids = []
         for page in range(1, 99):
             if break_now:
                 break
@@ -25,7 +26,6 @@ class Search:
             if len(links) == 1:
                 break
 
-            vids = []
             for link in links:
                 line_split = link.split('" data-nicoad-video')
                 video_id = line_split[0]

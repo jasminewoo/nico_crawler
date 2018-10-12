@@ -7,11 +7,11 @@ import boto3
 
 import logging
 
+logging.getLogger('botocore').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
 
 k_VIDEO_ID = 'video_id'
 k_VIDEO_STATUS = 'video_status'
-k_TRIALS_REMAINING = 'trials_remaining'
 k_LAST_MODIFIED_UTC = 'last_modified_utc'
 
 
@@ -46,9 +46,6 @@ class DynamoDbIndexer(Indexer):
 
     def set_status(self, video_id, status):
         self._update_by_video_id(video_id=video_id, key=k_VIDEO_STATUS, value=status)
-
-    def set_trials_remaining(self, video_id, trials_remaining):
-        self._update_by_video_id(video_id=video_id, key=k_TRIALS_REMAINING, value=trials_remaining)
 
     def _get_item(self, video_id):
         response = self.table.get_item(

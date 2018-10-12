@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 from abc import ABCMeta, abstractmethod
@@ -6,17 +5,13 @@ from abc import ABCMeta, abstractmethod
 from core import global_config
 from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
-from core.mylist import MyList
 from core.repeated_timer import RepeatedTimer
-from core.search import Search
-from core.video import Video
 from indexer.dynamodb import DynamoDbIndexer
 from indexer.local import LocalIndexer
 from storage.google_drive import GoogleDrive
 
 log = logging.getLogger(__name__)
-k_REQUEST_FOLDER = './requests'
-k_SECRET_CONFIG_FILENAME = 'config_secret.json'
+k_REQUEST_FOLDER = 'requests'
 
 
 class App(metaclass=ABCMeta):
@@ -53,7 +48,6 @@ class AppSingleMode(App):
     def wait_and_quit(self):
         for thread in self.threads:
             thread.join()
-        self.queue.timer.stop()
 
 
 class AppDaemonMode(App):
@@ -80,13 +74,10 @@ class AppDaemonMode(App):
 
 
 def _get_storage():
-    if os.path.exists(k_SECRET_CONFIG_FILENAME):
-        with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
-            config = json.load(fp)
-            if 'google_drive_folder_id' in config:
-                storage = GoogleDrive(config=config)
-                log.info('Initialized storage object with config')
-                return storage
+    if 'google_drive_folder_id' in global_config.instance:
+        storage = GoogleDrive(config=global_config.instance)
+        log.info('Initialized storage object with config')
+        return storage
     storage = GoogleDrive()
     log.info('Initialized storage object with default settings')
     return storage
@@ -95,11 +86,7 @@ def _get_storage():
 def _get_indexer():
     indexer = LocalIndexer()
     aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
-    if os.path.exists(k_SECRET_CONFIG_FILENAME):
-        with open(k_SECRET_CONFIG_FILENAME, 'r') as fp:
-            config = json.load(fp)
-            for field in aws_required_fields:
-                if field not in config:
-                    return indexer
-            return DynamoDbIndexer(config=config)
-    return indexer
+    for field in aws_required_fields:
+        if field not in global_config.instance:
+            return indexer
+    return DynamoDbIndexer(config=global_config.instance)

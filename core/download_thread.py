@@ -1,22 +1,21 @@
 from __future__ import unicode_literals
 
 import logging
-import os
 import time
 from threading import Thread
 from urllib.error import URLError
 
-import youtube_dl
 from youtube_dl.utils import ExtractorError, DownloadError
 
 from core import global_config
+from core.custom_youtube_dl import CustomYoutubeDL
+from core.nico_object_factory import NicoObjectFactory
+from core.video import Video
 
 logging.getLogger('youtube_dl').setLevel('CRITICAL')
 logging.getLogger('urllib').setLevel('CRITICAL')
 
 log = logging.getLogger(__name__)
-
-k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 
 class DownloadThread(Thread):
@@ -33,16 +32,23 @@ class DownloadThread(Thread):
             if video:
                 log.debug('Starting to process {}'.format(video))
                 try:
-                    self.download(video=video)
-                    self.queue.mark_as_done(video)
-                    log.info('Finished:      {}'.format(video))
-                    if self.is_crawl:
-                        pass
+                    vt = video.video_type
+                    if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
+                        self.download(video=video)
+                        self.queue.mark_as_done(video)
+                        log.info('Finished:      {}'.format(video))
+                        if self.is_crawl:
+                            self.enqueue_related_videos(video=video)
+                    else:
+                        if self.is_crawl:
+                            self.enqueue_related_videos(video=video)
+                        self.queue.mark_as_referenced(video)
+                        log.info('Referenced:    {}'.format(video))
                 except RetriableError:
                     self.queue.enqueue_again(video)
                     log.info('Pending retry: {}'.format(video))
                 except LogInError:
-                    self.queue.stop_retrying(video)
+                    self.queue.mark_as_login_required(video)
                     log.info('LogInError:    {}'.format(video))
             else:
                 if not self.is_daemon:
@@ -51,41 +57,26 @@ class DownloadThread(Thread):
         time.sleep(1)
 
     def download(self, video):
-        ret_code = -1
-
-        ydl = youtube_dl.YoutubeDL(get_ydl_options())
+        ydl = CustomYoutubeDL(video)
         try:
-            ret_code = ydl.download([video.url])
+            if ydl.download() != 0:
+                raise RuntimeError
+            if self.storage:
+                self.storage.upload_file(ydl.filename, ydl.path)
         except (URLError, ExtractorError, DownloadError) as e:
-            log.debug(e)
             if 'Niconico videos now require logging in' in str(e):
                 raise LogInError
-            raise RetriableError
+            else:
+                log.debug(e)
+                raise RetriableError
+        if self.storage:
+            ydl.remove_local_file()
 
-        filename = get_filename_by_video_id(video_id=video.video_id)
-        if filename:
-            path = '{}/{}'.format(k_DOWNLOADS_FOLDER_PATH, filename)
-
-        if ret_code == 0:
-            if self.storage:
-                self.storage.upload_file(filename, path)
-
-        if self.storage and filename:
-            os.remove(path)
-
-        if ret_code != 0:
-            raise RetriableError
-
-
-class SilentLogger(object):
-    def debug(self, msg):
-        log.debug(msg)
-
-    def warning(self, msg):
-        log.debug(msg)
-
-    def error(self, msg):
-        log.debug(msg)
+    def enqueue_related_videos(self, video):
+        for url in video.get_related_urls():
+            related_videos = NicoObjectFactory(url=url).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+            for rv in related_videos:
+                self.queue.enqueue(video=rv)
 
 
 class RetriableError(Exception):
@@ -94,24 +85,3 @@ class RetriableError(Exception):
 
 class LogInError(Exception):
     pass
-
-
-def get_ydl_options():
-    return {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': '{}/%(upload_date)-s%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': global_config.instance['convert_to'],
-            'preferredquality': '320',
-        }],
-        'logger': SilentLogger()
-    }
-
-
-def get_filename_by_video_id(video_id):
-    files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
-    filtered_list = list(filter(lambda f: video_id in f, files))
-    if filtered_list and len(filtered_list) > 0:
-        return filtered_list[0]
-    return None

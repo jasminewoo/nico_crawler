@@ -3,8 +3,7 @@ from datetime import datetime, timedelta
 from multiprocessing import Lock
 
 from core import global_config
-from core.mylist import MyList
-from core.search import Search
+from core.nico_object_factory import NicoObjectFactory
 from core.video import Video
 from indexer.indexer_service import Indexer
 
@@ -19,8 +18,14 @@ class QueueElement:
         self.is_done = False
         self.next_trial_timestamp = datetime.utcnow()
 
+    def __str__(self):
+        return self.video.video_id
+
 
 class CyclicQueue:
+    k_RE_ENQUEUE_MODE_SEND_TO_BACK = 'send_to_back'
+    k_RE_ENQUEUE_MODE_KEEP_POSITION = 'keep_position'
+
     def __init__(self, indexer=None):
         self._lock = Lock()
         self._list = []
@@ -39,12 +44,7 @@ class CyclicQueue:
             AssertionError('Only one parameter allowed')
 
         if url:
-            if 'mylist' in url:
-                videos = MyList(url=url).videos
-            elif 'search' in url:
-                videos = Search(url=url).videos
-            else:
-                videos = [Video(url=url)]
+            videos = NicoObjectFactory(url=url).get_videos()
         else:
             videos = [video]
 
@@ -82,30 +82,32 @@ class CyclicQueue:
         qe.is_done = True
         self._lock.release()
 
-    def mark_as_errored(self, video):
+    def mark_as_login_required(self, video):
+        self._lock.acquire()
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_LOGIN_REQUIRED)
+        self._lock.release()
+
+    def mark_as_referenced(self, video):
         self._lock.acquire()
         qe = self.get_qe_by_video_id(video.video_id)
         qe.trials_remaining = 0
-        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_ERRORED)
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_REFERENCED)
         self._lock.release()
 
-    def stop_retrying(self, video):
-        self._lock.acquire()
-        qe = self.get_qe_by_video_id(video.video_id)
-        qe.trials_remaining = 0
-        self._lock.release()
-
-    def enqueue_again(self, video):
+    def enqueue_again(self, video, mode=k_RE_ENQUEUE_MODE_SEND_TO_BACK):
         self._lock.acquire()
 
         qe = self.get_qe_by_video_id(video.video_id)
-        self._list.remove(qe)
+
         qe.is_available = True
         qe.trials_remaining -= 1
-        qe.next_trial_timestamp += timedelta(seconds=global_config.instance['retry_interval_in_seconds'])
         if qe.trials_remaining == 0:
             self.indexer.set_status(video_id=qe.video.video_id, status=Indexer.k_STATUS_ERRORED)
-        self._list.append(qe)
+
+        if mode == self.k_RE_ENQUEUE_MODE_SEND_TO_BACK:
+            qe.next_trial_timestamp += timedelta(seconds=global_config.instance['retry_interval_in_seconds'])
+            self._list.remove(qe)
+            self._list.append(qe)
 
         self._lock.release()
 
