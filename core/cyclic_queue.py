@@ -33,7 +33,9 @@ class CyclicQueue:
         self.load_from_previous_session()
 
     def load_from_previous_session(self):
+        log.info('Loading previous session from indexer...')
         pending_video_ids = self.indexer.get_pending_video_ids()
+        log.info('len(pending_video_ids) = {}'.format(len(pending_video_ids)))
         for video_id in pending_video_ids:
             video = Video(video_id=video_id)
             qe = QueueElement(video=video)
@@ -54,9 +56,9 @@ class CyclicQueue:
             if not exists:
                 self._list.append(QueueElement(video))
                 self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
-                log.info('Enqueued:  {}'.format(video.video_id))
+                log.info('Enqueued:      {}'.format(video.video_id))
             else:
-                log.info('Duplicate: {}'.format(video.video_id))
+                log.info('Duplicate:     {}'.format(video.video_id))
         self._lock.release()
 
     def peek_and_reserve(self):

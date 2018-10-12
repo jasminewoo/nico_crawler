@@ -23,7 +23,7 @@ class Video:
             self.video_id = url.split('/')[-1].split('?')[0]
         if video_id:
             self.video_id = video_id
-        self._html = None
+        self._http_response = None
         self._video_json = None
         self.requires_creds = False
 
@@ -73,11 +73,19 @@ class Video:
             log.debug('{} has no description'.format(self.video_id))
 
     @property
-    def is_deleted(self):
-        return 'お探しの動画は再生できません' in self.html
+    def is_deleted_or_private(self):
+        return self.http_status_code != 403 or \
+               self.http_status_code == 404 or \
+               'ページが見つかりませんでした' in self.html or \
+               'お探しの動画は再生できません' in self.html or \
+               '動画が投稿されている公開コミュニティ一覧' in self.html or \
+               'チャンネル会員専用動画' in self.html
 
     @property
     def mylist(self):
+        if self.is_deleted_or_private:
+            return 0
+
         if self.video_json:
             return self.video_json['video']['mylistCount']
 
@@ -92,15 +100,19 @@ class Video:
             idx_end = self.html.index('</span>', idx_start)
             return int(self.html[idx_start:idx_end].replace(',', ''))
         else:
-            log.debug('{} has no mylist count'.format(self.video_id))
-            return 0
+            raise ValueError('{} has no mylist count'.format(self.video_id))
+
+    @property
+    def http_status_code(self):
+        if not self._http_response:
+            self._http_response = requests.get(self.url)
+        return self._http_response.status_code
 
     @property
     def html(self):
-        if not self._html:
-            r = requests.get(self.url)
-            self._html = html_lib.unescape(str(r.text))
-        return self._html
+        if not self._http_response:
+            self._http_response = requests.get(self.url)
+        return html_lib.unescape(str(self._http_response.text)) + str(self._http_response)
 
     @property
     def video_json(self):
