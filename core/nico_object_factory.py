@@ -24,6 +24,8 @@ class NicoObjectFactory:
 
         to_return = []
         for vid in vids:
-            if vid.mylist > min_mylist:
+            if vid.is_deleted:
+                continue
+            if vid.mylist >= min_mylist:
                 to_return.append(vid)
         return to_return

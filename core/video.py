@@ -8,7 +8,8 @@ import requests
 logging.getLogger('urllib3').setLevel('CRITICAL')
 logging.getLogger('youtube-dl').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
-url_regex_str='http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+url_regex_str = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
 
 class Video:
     k_VIDEO_TYPE_UTATTEMITA = 'utattemita'
@@ -62,7 +63,7 @@ class Video:
         if self.video_json:
             return self.video_json['video']['description']
 
-        #tag1 = '<meta itemprop="description" content="'
+        # tag1 = '<meta itemprop="description" content="'
         tag2 = '<p class="VideoDescription-text" itemprop="description">'
         if tag2 in self.html:
             idx_start = self.html.index(tag2) + len(tag2)
@@ -70,6 +71,10 @@ class Video:
             return self.html[idx_start:idx_end]
         else:
             log.debug('{} has no description'.format(self.video_id))
+
+    @property
+    def is_deleted(self):
+        return 'お探しの動画は再生できません' in self.html
 
     @property
     def mylist(self):
