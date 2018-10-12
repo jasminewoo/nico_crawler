@@ -1,7 +1,7 @@
 import re
+
 import requests
 
-from core import global_config
 from core.video import Video
 
 k_MYLIST_PATTERN = re.compile('(?<=<a href="/mylistcomment/video/)(.*?)">(.*?)(?=</a>)')
@@ -10,6 +10,9 @@ k_MYLIST_PATTERN = re.compile('(?<=<a href="/mylistcomment/video/)(.*?)">(.*?)(?
 class Ranking:
     def __init__(self, url):
         self.url = url
+
+    def __str__(self):
+        return 'Daily Ranking'
 
     @property
     def videos(self):

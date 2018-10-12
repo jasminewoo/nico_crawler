@@ -1,7 +1,11 @@
+import logging
+
 from core.mylist import MyList
 from core.ranking import Ranking
 from core.search import Search
 from core.video import Video
+
+log = logging.getLogger(__name__)
 
 
 class NicoObjectFactory:
@@ -17,13 +21,17 @@ class NicoObjectFactory:
             self.nico_object = Video(url=url)
 
     def get_videos(self, min_mylist=0):
+        log.debug('Getting videos for {}'.format(self.nico_object))
         vids = self.nico_object.videos if type(self.nico_object) is not Video else [self.nico_object]
+        log.debug('len(vids) = {}'.format(len(vids)))
 
         if min_mylist == 0:
             return vids
 
         to_return = []
         for vid in vids:
-            if vid.mylist >= min_mylist:
+            if vid.mylist_count >= min_mylist:
                 to_return.append(vid)
+            else:
+                log.debug('{} mylist count too low'.format(vid))
         return to_return

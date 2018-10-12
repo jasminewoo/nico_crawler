@@ -12,6 +12,9 @@ class MyList:
     def __init__(self, url):
         self.url = url
 
+    def __str__(self):
+        return '/'.join(self.url.split('/')[-2:])
+
     @property
     def videos(self):
         vids = []
@@ -30,13 +33,14 @@ class MyList:
                     line = line[idx_start:-2]
                     my_json = json.loads(line)
 
-            if not my_json:
-                raise RuntimeError('Could not get data from {}'.format(self.url))
-
             for item in my_json:
-                v = Video(video_id=item['item_data']['video_id'])
+                id = item['item_data']['video_id']
+                mlc = int(item['item_data']['mylist_counter'])
+                v = Video(video_id=id, mylist_count=mlc)
                 vids.append(v)
         elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str:
             log.debug('Private mylist {}'.format(self.url))
+        else:
+            raise RuntimeError('Could not get data from {}'.format(self.url))
 
         return vids

@@ -12,6 +12,9 @@ class Search:
     def __init__(self, url):
         self.url = url.split('?')[0]
 
+    def __str__(self):
+        return '/'.join(self.url.split('/')[-2:])
+
     @property
     def videos(self):
         break_now = False

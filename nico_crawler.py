@@ -16,4 +16,3 @@ if __name__ == '__main__':
     else:
         log.info('AppDaemonMode')
         AppDaemonMode()
-        log.info('Ready to process requests')

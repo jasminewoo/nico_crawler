@@ -41,7 +41,7 @@ class CyclicQueue:
             qe = QueueElement(video=video)
             self._list.append(qe)
 
-    def enqueue(self, video=None, url=None):
+    def enqueue(self, video=None, url=None, parent_video=None):
         if (1 if video else 0) + (1 if url else 0) != 1:
             AssertionError('Only one parameter allowed')
 
@@ -52,13 +52,14 @@ class CyclicQueue:
 
         self._lock.acquire()
         for video in videos:
+            parent_str = '' if not parent_video else ' (Parent: {})'.format(parent_video)
             exists = self.indexer.exists(video_id=video.video_id)
             if not exists:
                 self._list.append(QueueElement(video))
                 self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
-                log.info('Enqueued:      {}'.format(video.video_id))
+                log.info('Enqueued:      {}{}'.format(video.video_id, parent_str))
             else:
-                log.info('Duplicate:     {}'.format(video.video_id))
+                log.info('Duplicate:     {}{}'.format(video.video_id, parent_str))
         self._lock.release()
 
     def peek_and_reserve(self):

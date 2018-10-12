@@ -30,12 +30,15 @@ class DownloadThread(Thread):
         while True:
             video = self.queue.peek_and_reserve()
             if video:
-                log.debug('Starting to process {}'.format(video))
+                log.info('Start          {}'.format(video))
                 try:
                     if self.is_crawl:
+                        log.info('Crawling:      {}'.format(video))
                         self.enqueue_related_videos(video=video)
+                    log.info('Crawl Done:    {}'.format(video))
                     vt = video.video_type
                     if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
+                        log.info('Downloading:   {}'.format(video))
                         self.download(video=video)
                         self.queue.mark_as_done(video)
                         log.info('Finished:      {}'.format(video))
@@ -72,7 +75,9 @@ class DownloadThread(Thread):
 
     def enqueue_related_videos(self, video):
         for url in video.get_related_urls():
+            log.debug('Processing url={}'.format(url))
             related_videos = NicoObjectFactory(url=url).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+            log.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             for rv in related_videos:
                 self.queue.enqueue(video=rv)
 

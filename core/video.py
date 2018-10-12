@@ -16,7 +16,7 @@ class Video:
     k_VIDEO_TYPE_VOCALOID_ORG = 'org'
     k_VIDEO_TYPE_UNKNOWN = 'unknown'
 
-    def __init__(self, video_id=None, url=None):
+    def __init__(self, video_id=None, url=None, mylist_count=None):
         if (1 if video_id else 0) + (1 if url else 0) != 1:
             raise AssertionError('Need one of video_id and url')
         if url:
@@ -25,14 +25,14 @@ class Video:
             self.video_id = video_id
         self._http_response = None
         self._video_json = None
-        self.requires_creds = False
+        self._requires_creds = False
+        self._mylist_count = mylist_count
 
     def get_related_urls(self):
         urls = []
         vt = self.video_type
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
-            desc = self.description
-            matches = re.findall(url_regex_str, desc)
+            matches = re.findall(url_regex_str, self.description)
             for url in matches:
                 if 'nicovideo' not in url:
                     continue
@@ -43,6 +43,11 @@ class Video:
             urls.append(search_template.format(self.video_id))
 
         return urls
+
+    @property
+    def requires_login(self):
+        return self._requires_creds or \
+               'メールアドレスまたは電話番号' in self.html
 
     @property
     def url(self):
@@ -74,33 +79,36 @@ class Video:
 
     @property
     def is_deleted_or_private(self):
-        return self.http_status_code != 403 or \
+        return self.http_status_code == 403 or \
                self.http_status_code == 404 or \
                'ページが見つかりませんでした' in self.html or \
                'お探しの動画は再生できません' in self.html or \
+               'Unable to play video' in self.html or \
                '動画が投稿されている公開コミュニティ一覧' in self.html or \
                'チャンネル会員専用動画' in self.html
 
     @property
-    def mylist(self):
+    def mylist_count(self):
         if self.is_deleted_or_private:
             return 0
 
-        if self.video_json:
-            return self.video_json['video']['mylistCount']
-
-        if 'mylistCount' in self.html:
-            idx_start = self.html.index('mylistCount')
-            idx_start = self.html.index(':', idx_start)
-            idx_end = self.html.index(',', idx_start)
-            return int(self.html[idx_start + 1:idx_end])
-        elif 'MylistCountMeta-counter' in self.html:
-            start_str = 'MylistCountMeta-counter"><span class="FormattedNumber">'
-            idx_start = self.html.index(start_str) + len(start_str)
-            idx_end = self.html.index('</span>', idx_start)
-            return int(self.html[idx_start:idx_end].replace(',', ''))
-        else:
-            raise ValueError('{} has no mylist count'.format(self.video_id))
+        if not self._mylist_count:
+            if self.video_json:
+                self._mylist_count = int(self.video_json['video']['mylistCount'])
+            else:
+                if 'mylistCount' in self.html:
+                    idx_start = self.html.index('mylistCount')
+                    idx_start = self.html.index(':', idx_start)
+                    idx_end = self.html.index(',', idx_start)
+                    self._mylist_count = int(self.html[idx_start + 1:idx_end])
+                elif 'MylistCountMeta-counter' in self.html:
+                    start_str = 'MylistCountMeta-counter"><span class="FormattedNumber">'
+                    idx_start = self.html.index(start_str) + len(start_str)
+                    idx_end = self.html.index('</span>', idx_start)
+                    self._mylist_count = int(self.html[idx_start:idx_end].replace(',', ''))
+                else:
+                    raise ValueError('{} has no mylist count'.format(self.video_id))
+        return self._mylist_count
 
     @property
     def http_status_code(self):
