@@ -12,7 +12,7 @@ class LocalIndexer(Indexer):
         Indexer.__init__(self, config=config)
         self.map = {}
         self.load_from_disk()
-        self._timer = RepeatedTimer(self._write)
+        # self._timer = RepeatedTimer(self._write)
         self._lock = Lock()
 
     def load_from_disk(self):
