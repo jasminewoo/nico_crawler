@@ -93,7 +93,7 @@ class Video:
             return 0
 
         if not self._mylist_count:
-            if self.video_json.requires_creds:
+            if self.video_json:
                 self._mylist_count = int(self.video_json['video']['mylistCount'])
             else:
                 if 'mylistCount' in self.html:
