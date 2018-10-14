@@ -25,7 +25,7 @@ class Video:
             self.video_id = video_id
         self._http_response = None
         self._video_json = None
-        self._requires_creds = False
+        self.requires_creds = False
         self._mylist_count = mylist_count
 
     def get_related_urls(self):
@@ -46,7 +46,7 @@ class Video:
 
     @property
     def requires_login(self):
-        return self._requires_creds or \
+        return self.requires_creds or \
                'メールアドレスまたは電話番号' in self.html
 
     @property
@@ -93,7 +93,7 @@ class Video:
             return 0
 
         if not self._mylist_count:
-            if self.video_json:
+            if self.video_json.requires_creds:
                 self._mylist_count = int(self.video_json['video']['mylistCount'])
             else:
                 if 'mylistCount' in self.html:
