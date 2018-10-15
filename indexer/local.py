@@ -25,8 +25,11 @@ class LocalIndexer(Indexer):
         #             self.map[video_id] = status
         pass
 
-        return list(filter(lambda video_id: map['video_id'] == self.k_STATUS_PENDING, self.map))
     def get_pending_video_ids(self, max_id_count=None):
+        l = list(filter(lambda video_id: map['video_id'] == self.k_STATUS_PENDING, self.map))
+        if max_id_count and len(l) > max_id_count:
+            l = l[:max_id_count]
+        return l
 
     def get_status(self, video_id):
         return self.map[video_id] if video_id in self.map else self.k_STATUS_NOT_FOUND

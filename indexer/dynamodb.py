@@ -16,6 +16,8 @@ k_VIDEO_ID = 'video_id'
 k_VIDEO_STATUS = 'video_status'
 k_LAST_MODIFIED_UTC = 'last_modified_utc'
 
+k_SEARCH_LIMIT = 50000
+
 
 class DynamoDbIndexer(Indexer):
     def __init__(self, config=None):
@@ -29,15 +31,21 @@ class DynamoDbIndexer(Indexer):
         self.table = ddb.Table('nico_crawler')
 
     def get_pending_video_ids(self, max_id_count=None):
+        if max_id_count > k_SEARCH_LIMIT:
+            AssertionError('get_pending_video_ids assertion: {} <= {} failed'.format(max_id_count, k_SEARCH_LIMIT))
+
         video_ids = []
 
         response = self.table.query(
             IndexName='video_status-index',
-            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(self.k_STATUS_PENDING)
+            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(self.k_STATUS_PENDING),
+            Limit=k_SEARCH_LIMIT
         )
 
         if 'Items' in response:
             for item in response['Items']:
+                if max_id_count and len(video_ids) > max_id_count:
+                    break
                 video_ids.append(item[k_VIDEO_ID])
 
         return video_ids
