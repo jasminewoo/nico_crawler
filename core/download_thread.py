@@ -32,9 +32,6 @@ class DownloadThread(Thread):
             if video:
                 log.info('Start          {}'.format(video))
                 try:
-                    if self.is_crawl:
-                        log.info('Crawling:      {}'.format(video))
-                        self.enqueue_related_videos(video=video)
                     log.info('Crawl Done:    {}'.format(video))
                     vt = video.video_type
                     if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
@@ -42,7 +39,9 @@ class DownloadThread(Thread):
                         self.download(video=video)
                         self.queue.mark_as_done(video)
                         log.info('Finished:      {}'.format(video))
+                        self.enqueue_related_videos(video=video)
                     else:
+                        self.enqueue_related_videos(video=video)
                         self.queue.mark_as_referenced(video)
                         log.info('Referenced:    {}'.format(video))
                 except RetriableError:
@@ -74,6 +73,9 @@ class DownloadThread(Thread):
             ydl.remove_local_file()
 
     def enqueue_related_videos(self, video):
+        if not self.is_crawl:
+            return
+        log.info('Crawling:      {}'.format(video))
         for url in video.get_related_urls():
             log.debug('Processing url={}'.format(url))
             related_videos = NicoObjectFactory(url=url).get_videos(min_mylist=global_config.instance['minimum_mylist'])
