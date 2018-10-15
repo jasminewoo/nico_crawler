@@ -81,7 +81,7 @@ class DownloadThread(Thread):
             related_videos = NicoObjectFactory(url=url).get_videos(min_mylist=global_config.instance['minimum_mylist'])
             log.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             for rv in related_videos:
-                self.queue.enqueue(video=rv)
+                self.queue.enqueue(video=rv, parent_video=video)
 
 
 class RetriableError(Exception):
