@@ -22,7 +22,7 @@ class Indexer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_pending_video_ids(self):
+    def get_pending_video_ids(self, max_id_count=None):
         pass
 
     def exists(self, video_id):

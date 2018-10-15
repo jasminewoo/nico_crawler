@@ -28,7 +28,7 @@ class DynamoDbIndexer(Indexer):
         ddb = session.resource('dynamodb')
         self.table = ddb.Table('nico_crawler')
 
-    def get_pending_video_ids(self):
+    def get_pending_video_ids(self, max_id_count=None):
         video_ids = []
 
         response = self.table.query(
