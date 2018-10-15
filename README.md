@@ -1,13 +1,14 @@
 # nico_crawler
 
 - Python ≥ 3.6
-- Download & convert nico videos as audio files in parallel
+- Crawls Nicovideo.jp and downloads '歌ってみた' audio files
 - Failed downloads get added back to the end of the queue so they get tried again
-- The in-memory queue periodically gets written to the disk in case of application/system shutdown
+- Uses Amazon DynamoDB to keep track of the downloads
+- (Optional) Downloaded files get uploaded to Google Drive and get deleted from local disk.
 
 ## Usage
 
-### Start Daemon Process
+### Start Crawler
 
 ```bash
 ./nico_crawler.sh start &
@@ -15,7 +16,7 @@
 
 Note: If you are downloading a large collection of videos, consider using it remotely with [nohup](https://linux.die.net/man/1/nohup).
 
-### Download Videos
+### Download Videos Manually
 
 ```bash
 ./nico_crawler.sh add ${url}
@@ -29,7 +30,7 @@ where `url` is:
 |mylist|`.../mylist/123456`|All videos in the list will be downloaded|
 |search|`.../search/keyword`|All _popular_ videos in the serach result will be downloaded| A _popular_ video needs to satisfy `mylist_count` ≥ [`minimum_mylist`](config.json)|
 
-### Kill process
+### Kill Crawler
 
 ```bash
 ./nico_crawler.sh kill
