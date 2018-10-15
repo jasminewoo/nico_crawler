@@ -15,7 +15,6 @@ class QueueElement:
         self.video = video
         self.is_available = True
         self.trials_remaining = global_config.instance['max_retry']
-        self.is_done = False
         self.next_trial_timestamp = datetime.utcnow()
 
     def __str__(self):
@@ -67,9 +66,8 @@ class CyclicQueue:
 
         to_return = None
         for qe in self._list:
-            is_free = qe.is_available and not qe.is_done
             can_try = qe.trials_remaining > 0 and qe.next_trial_timestamp < datetime.utcnow()
-            if is_free and can_try:
+            if qe.is_available and can_try:
                 qe.is_available = False
                 to_return = qe.video
                 break
@@ -82,7 +80,6 @@ class CyclicQueue:
         self._lock.acquire()
         qe = self.get_qe_by_video_id(video.video_id)
         self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_DONE)
-        qe.is_done = True
         self._lock.release()
 
     def mark_as_login_required(self, video):
