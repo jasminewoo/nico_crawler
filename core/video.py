@@ -93,6 +93,7 @@ class Video:
             return 0
 
         if not self._mylist_count:
+            log.debug('{} determining mylist_count...'.format(self))
             if self.video_json:
                 self._mylist_count = int(self.video_json['video']['mylistCount'])
             else:
