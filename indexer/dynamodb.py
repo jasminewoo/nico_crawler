@@ -44,7 +44,7 @@ class DynamoDbIndexer(Indexer):
 
         if 'Items' in response:
             for item in response['Items']:
-                if max_id_count and len(video_ids) > max_id_count:
+                if max_id_count and len(video_ids) == max_id_count:
                     break
                 video_ids.append(item[k_VIDEO_ID])
 
