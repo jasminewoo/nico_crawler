@@ -41,7 +41,7 @@ class Search:
                     pos = k_MYLIST_PATTERN.search(rest).regs[-1]
                     mylist_count = int(rest[pos[0]:pos[1]].replace(',', ''))
                     if mylist_count >= global_config.instance['minimum_mylist']:
-                        vid = Video(video_id=video_id)
+                        vid = Video(video_id=video_id, mylist_count=mylist_count)
                         vids.append(vid)
                     else:
                         break_now = True
