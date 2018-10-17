@@ -32,7 +32,6 @@ class DownloadThread(Thread):
             if video:
                 log.info('Start          {}'.format(video))
                 try:
-                    log.info('Crawl Done:    {}'.format(video))
                     vt = video.video_type
                     if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
                         log.info('Downloading:   {}'.format(video))
@@ -82,6 +81,7 @@ class DownloadThread(Thread):
             log.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             for rv in related_videos:
                 self.queue.enqueue(video=rv, parent_video=video)
+        log.info('Crawl Done:    {}'.format(video))
 
 
 class RetriableError(Exception):
