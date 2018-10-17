@@ -1,8 +1,6 @@
 import logging
-from datetime import datetime, timedelta
 from multiprocessing import Lock
 
-from core import global_config
 from core.nico_object_factory import NicoObjectFactory
 from core.repeated_timer import RepeatedTimer
 from core.video import Video
@@ -10,50 +8,49 @@ from indexer.indexer_service import Indexer
 
 log = logging.getLogger(__name__)
 
-k_MAX_QUEUE_SIZE = 1000
+k_MAX_QUEUE_SIZE = 500
+k_MAX_RETRY = 3
 
 
 class QueueElement:
     def __init__(self, video):
         self.video = video
         self.is_available = True
-        self.trials_remaining = global_config.instance['max_retry']
-        self.next_trial_timestamp = datetime.utcnow()
+        self.trials_remaining = k_MAX_RETRY
 
     def __str__(self):
         return self.video.video_id
 
 
 class CyclicQueue:
-    k_RE_ENQUEUE_MODE_SEND_TO_BACK = 'send_to_back'
-    k_RE_ENQUEUE_MODE_KEEP_POSITION = 'keep_position'
-
     def __init__(self, indexer=None):
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        self.replenish_timer = RepeatedTimer(30, self.replenish)
-        self.load_from_previous_session()
+        self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
-    def load_from_previous_session(self):
-        log.info('Loading previous session from indexer...')
-        pending_video_ids = self.indexer.get_pending_video_ids(max_id_count=k_MAX_QUEUE_SIZE)
-        log.info('len(pending_video_ids) = {}'.format(len(pending_video_ids)))
-        for video_id in pending_video_ids:
-            video = Video(video_id=video_id)
-            qe = QueueElement(video=video)
-            self._list.append(qe)
+    def pull_from_indexer(self):
+        log.debug('len(queue)={}'.format(len(self._list)))
 
-    def replenish(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
 
-        new_video_ids = self.indexer.get_pending_video_ids(max_id_count=k_MAX_QUEUE_SIZE)
+        pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING, max_result_set_size=k_MAX_QUEUE_SIZE)
+        login_failed = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_LOGIN_REQUIRED,
+                                                            max_result_set_size=k_MAX_QUEUE_SIZE)
+
+        self._append_all(pending)
+        self._append_all(login_failed, requires_creds=True)
+
+    def _append_all(self, video_ids, requires_creds=False):
         self._lock.acquire()
-        existing_video_ids = [str(qe) for qe in self._list]
-        for new_video_id in new_video_ids:
+        existing_video_ids = {}
+        for qe in self._list:
+            existing_video_ids[str(qe)] = None
+        for new_video_id in video_ids:
             if new_video_id not in existing_video_ids:
                 video = Video(video_id=new_video_id)
+                video.requires_creds = requires_creds
                 qe = QueueElement(video=video)
                 self._list.append(qe)
         self._lock.release()
@@ -85,8 +82,7 @@ class CyclicQueue:
 
         to_return = None
         for qe in self._list:
-            can_try = qe.trials_remaining > 0 and qe.next_trial_timestamp < datetime.utcnow()
-            if qe.is_available and can_try:
+            if qe.is_available:
                 qe.is_available = False
                 to_return = qe.video
                 break
@@ -116,21 +112,16 @@ class CyclicQueue:
         self._list.remove(qe)
         self._lock.release()
 
-    def enqueue_again(self, video, mode=k_RE_ENQUEUE_MODE_SEND_TO_BACK):
+    def enqueue_again(self, video):
         self._lock.acquire()
 
         qe = self.get_qe_by_video_id(video.video_id)
         qe.is_available = True
         qe.trials_remaining -= 1
 
+        self._list.remove(qe)
         if qe.trials_remaining > 0:
-            if mode == self.k_RE_ENQUEUE_MODE_SEND_TO_BACK:
-                qe.next_trial_timestamp += timedelta(seconds=global_config.instance['retry_interval_in_seconds'])
-                self._list.remove(qe)
-                self._list.append(qe)
-        else:
-            self.indexer.set_status(video_id=qe.video.video_id, status=Indexer.k_STATUS_ERRORED)
-            self._list.remove(qe)
+            self._list.append(qe)
 
         self._lock.release()
 

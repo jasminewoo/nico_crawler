@@ -1,7 +1,5 @@
 {
   "convert_to": "m4a",
   "minimum_mylist": 100,
-  "thread_count": 12,
-  "retry_interval_in_seconds": 21600,
-  "max_retry": 10
+  "thread_count": 12
 }
