@@ -30,25 +30,32 @@ class DynamoDbIndexer(Indexer):
         ddb = session.resource('dynamodb')
         self.table = ddb.Table('nico_crawler')
 
-    def get_pending_video_ids(self, max_id_count=None):
-        if max_id_count > k_SEARCH_LIMIT:
-            AssertionError('get_pending_video_ids assertion: {} <= {} failed'.format(max_id_count, k_SEARCH_LIMIT))
+    def get_video_ids_by_status(self, status, max_result_set_size=None):
+        response = self._get_items_by_status(status, max_result_set_size=max_result_set_size)
 
         video_ids = []
+        for item in response:
+            if max_result_set_size and len(video_ids) == max_result_set_size:
+                break
+            video_ids.append(item[k_VIDEO_ID])
+
+        return video_ids
+
+    def _get_items_by_status(self, status, max_result_set_size=None):
+        if max_result_set_size > k_SEARCH_LIMIT:
+            AssertionError(
+                '_get_items_by_status assertion: {} <= {} failed'.format(max_result_set_size, k_SEARCH_LIMIT))
 
         response = self.table.query(
             IndexName='video_status-index',
-            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(self.k_STATUS_PENDING),
+            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(status),
             Limit=k_SEARCH_LIMIT
         )
 
         if 'Items' in response:
-            for item in response['Items']:
-                if max_id_count and len(video_ids) == max_id_count:
-                    break
-                video_ids.append(item[k_VIDEO_ID])
-
-        return video_ids
+            return response['Items']
+        else:
+            return []
 
     def get_status(self, video_id):
         item = self._get_item(video_id=video_id)
