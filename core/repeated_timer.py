@@ -20,8 +20,11 @@ class RepeatedTimer(object):
             self._setup_timer()
 
     def _setup_timer(self):
-        # No delay for the very first run
-        interval = self.interval_in_seconds if self._timer else 0
+        if self._timer:
+            interval = self.interval_in_seconds
+        else:
+            # No delay for the very first run
+            interval = 0
         self._timer = Timer(interval, self._run)
         self._timer.start()
 
