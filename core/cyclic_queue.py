@@ -39,9 +39,6 @@ class CyclicQueue:
         login_failed = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_LOGIN_REQUIRED,
                                                             max_result_set_size=k_MAX_QUEUE_SIZE)
 
-        log.debug('len(pending)={}'.format(len(pending)))
-        log.debug('len(login_failed)={}'.format(len(login_failed)))
-
         self._append_all(pending)
         self._append_all(login_failed, requires_creds=True)
 
