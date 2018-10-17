@@ -38,7 +38,7 @@ class CustomYoutubeDL(YoutubeDL):
             os.remove(path)
 
 
-def get_ydl_options(with_creds=False):
+def get_ydl_options(requires_creds=False):
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)-s%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
@@ -49,7 +49,7 @@ def get_ydl_options(with_creds=False):
         }],
         'logger': SilentLogger()
     }
-    if with_creds:
+    if requires_creds:
         options['username'] = global_config.instance['nico_username']
         options['password'] = global_config.instance['nico_password']
     return options
