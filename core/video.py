@@ -38,7 +38,7 @@ class Video:
                     continue
                 if '/watch/' in url or '/mylist/' in url:
                     urls.append(url)
-        else:
+        elif vt == self.k_VIDEO_TYPE_VOCALOID_ORG:
             search_template = 'https://www.nicovideo.jp/search/{}%20%E6%AD%8C%E3%81%A3%E3%81%A6%E3%81%BF%E3%81%9F'
             urls.append(search_template.format(self.video_id))
 
