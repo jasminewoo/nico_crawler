@@ -30,7 +30,7 @@ class CyclicQueue:
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
     def pull_from_indexer(self):
-        log.debug('len(queue)={}'.format(len(self._list)))
+        log.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
 
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
@@ -39,10 +39,14 @@ class CyclicQueue:
         login_failed = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_LOGIN_REQUIRED,
                                                             max_result_set_size=k_MAX_QUEUE_SIZE)
 
+        log.debug('len(pending)={}'.format(len(pending)))
+        log.debug('len(login_failed)={}'.format(len(login_failed)))
+
         self._append_all(pending)
         self._append_all(login_failed, requires_creds=True)
 
     def _append_all(self, video_ids, requires_creds=False):
+        log.debug('_append_all len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
         self._lock.acquire()
         existing_video_ids = {}
         for qe in self._list:
