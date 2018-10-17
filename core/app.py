@@ -7,7 +7,6 @@ from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
 from core.repeated_timer import RepeatedTimer
 from indexer.dynamodb import DynamoDbIndexer
-from indexer.local import LocalIndexer
 from storage.google_drive import GoogleDrive
 
 log = logging.getLogger(__name__)
@@ -89,9 +88,8 @@ def _get_storage():
 
 
 def _get_indexer():
-    indexer = LocalIndexer()
     aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
     for field in aws_required_fields:
         if field not in global_config.instance:
-            return indexer
+            raise AssertionError('AWS credentials must be provided')
     return DynamoDbIndexer(config=global_config.instance)
