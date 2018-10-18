@@ -47,6 +47,7 @@ class AppSingleMode(App):
     def wait_and_quit(self):
         for thread in self.threads:
             thread.join()
+        self.queue.replenish_timer.stop()
 
 
 class AppDaemonMode(App):

@@ -11,7 +11,7 @@ if [ ${action} == "start" ] ; then
     pip3 install -r requirements.txt
     python3 nico_crawler.py
     deactivate
-elif [ ${action} == "add" ] ; then
+elif [ ${action} == "download" ] ; then
     url=$2
     if [[ ! -d requests ]]; then
         mkdir requests
@@ -30,5 +30,5 @@ elif [ ${action} == "gd" ] ; then
     # TODO : save to config_secret.json
     echo "Coming soon...\n"
 else
-    echo "Not recognized action: ${action}\n"
+    echo "Not recognized action: ${action}"
 fi

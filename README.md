@@ -19,7 +19,7 @@ Note: If you are downloading a large collection of videos, consider using it rem
 ### Download Videos Manually
 
 ```bash
-./nico_crawler.sh add ${url}
+./nico_crawler.sh download ${url}
 ```
 
 where `url` is:
