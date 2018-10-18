@@ -15,13 +15,19 @@ class CustomYoutubeDL(YoutubeDL):
         self.video = video
 
     def download(self):
-        return YoutubeDL.download(self, [self.video.url])
+        try:
+            return YoutubeDL.download(self, [self.video.url])
+        except Exception as e:
+            if 'unable to obtain file audio codec with ffprobe' in str(e):
+                return 0
+            else:
+                raise
 
     @property
     def filename(self):
         files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
         filtered_list = list(filter(lambda f: self.video.video_id in f, files))
-        if filtered_list and len(filtered_list) > 0:
+        if filtered_list and len(filtered_list) == 1:
             return filtered_list[0]
         return None
 
