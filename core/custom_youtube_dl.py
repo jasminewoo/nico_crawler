@@ -15,13 +15,7 @@ class CustomYoutubeDL(YoutubeDL):
         self.video = video
 
     def download(self):
-        try:
-            return YoutubeDL.download(self, [self.video.url])
-        except Exception as e:
-            if 'unable to obtain file audio codec with ffprobe' in str(e):
-                return 0
-            else:
-                raise
+        return YoutubeDL.download(self, [self.video.url])
 
     @property
     def filename(self):
@@ -47,7 +41,7 @@ class CustomYoutubeDL(YoutubeDL):
 def get_ydl_options(requires_creds=False):
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': '{}/%(upload_date)-s%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
+        'outtmpl': '{}/%(upload_date)s-%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
