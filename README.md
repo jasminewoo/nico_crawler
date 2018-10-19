@@ -47,7 +47,7 @@ Note: This is a one-time configuration.
 ## Digital Ocean Setup (Ubuntu 18.04)
 
 ```bash
-# install pip3
+# install pip3/venv
 apt-get install software-properties-common
 apt-add-repository universe
 apt-get update
@@ -56,7 +56,6 @@ apt-get install python3-venv
 
 # install tools
 apt install ffmpeg   # For audio conversion
-apt install zip      # Only if you are zipping the audio files after
 
 # Clone code
 git clone https://github.com/lekordable/nico_crawler.git
