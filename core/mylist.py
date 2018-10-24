@@ -44,6 +44,6 @@ class MyList:
             self.logger.debug('Private mylist {}'.format(self.url))
 
         else:
-            raise RuntimeError('Could not get data from {}'.format(self.url))
+            raise RuntimeError('Could not get data from {}; {}'.format(self.url, html_str))
 
         return vids

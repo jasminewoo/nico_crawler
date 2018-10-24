@@ -105,7 +105,7 @@ class Video:
                     idx_end = self.html.index('</span>', idx_start)
                     self._mylist_count = int(self.html[idx_start:idx_end].replace(',', ''))
                 else:
-                    raise ValueError('{} has no mylist count'.format(self.video_id))
+                    raise ValueError('{} has no mylist count; {}'.format(self.video_id, self.html))
         return self._mylist_count
 
     @property
