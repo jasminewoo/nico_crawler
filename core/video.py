@@ -6,8 +6,6 @@ import re
 import requests
 
 logging.getLogger('urllib3').setLevel('CRITICAL')
-logging.getLogger('youtube-dl').setLevel('CRITICAL')
-log = logging.getLogger(__name__)
 url_regex_str = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 
@@ -28,11 +26,11 @@ class Video:
         self.requires_creds = False
         self._mylist_count = mylist_count
 
-    def get_related_urls(self):
+    def get_related_urls(self, logger):
         urls = []
         vt = self.video_type
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
-            matches = re.findall(url_regex_str, self.description)
+            matches = re.findall(url_regex_str, self.get_description(logger=logger))
             for url in matches:
                 if 'nicovideo' not in url:
                     continue
@@ -63,8 +61,7 @@ class Video:
         else:
             return self.k_VIDEO_TYPE_UNKNOWN
 
-    @property
-    def description(self):
+    def get_description(self, logger):
         if self.video_json:
             return self.video_json['video']['description']
 
@@ -75,7 +72,7 @@ class Video:
             idx_end = self.html.index('\n', idx_start) - len('</p>')
             return self.html[idx_start:idx_end]
         else:
-            log.debug('{} has no description'.format(self.video_id))
+            logger.debug('{} has no description'.format(self.video_id))
 
     @property
     def is_deleted_or_private(self):
@@ -87,13 +84,13 @@ class Video:
                '動画が投稿されている公開コミュニティ一覧' in self.html or \
                'チャンネル会員専用動画' in self.html
 
-    @property
-    def mylist_count(self):
+    def get_mylist_count(self, logger):
         if self.is_deleted_or_private:
+            logger.debug('This video is unavailable')
             return 0
 
         if not self._mylist_count:
-            log.debug('{} determining mylist_count...'.format(self))
+            logger.debug('{} determining mylist_count...'.format(self))
             if self.video_json:
                 self._mylist_count = int(self.video_json['video']['mylistCount'])
             else:

@@ -76,7 +76,7 @@ class DownloadThread(Thread):
         if not self.is_crawl:
             return
         self.logger.info('Crawling:      {}'.format(video))
-        for url in video.get_related_urls():
+        for url in video.get_related_urls(logger=self.logger):
             self.logger.debug('Processing url={}'.format(url))
             related_videos = NicoObjectFactory(url=url, logger=self.logger).get_videos(
                 min_mylist=global_config.instance['minimum_mylist'])
