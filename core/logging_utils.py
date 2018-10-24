@@ -35,6 +35,6 @@ def config_logging():
 
 
 def add_file_handler(logger, thread):
-    name = thread.getName()
+    name = thread.getName().split('-')[1] + '-Thread'
     new_handler = get_file_log_handler(name)
     logger.addHandler(new_handler)
