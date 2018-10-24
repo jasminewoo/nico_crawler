@@ -28,33 +28,43 @@ class DownloadThread(Thread):
     def run(self):
         self.logger = logging.getLogger(str(threading.get_ident()))
         logging_utils.add_file_handler(logger=self.logger, thread=threading.current_thread())
-        while True:
-            video = self.queue.peek_and_reserve()
-            if video:
-                self.logger.info('Start          {}'.format(video))
-                try:
-                    vt = video.video_type
-                    if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
-                        self.logger.info('Downloading:   {}'.format(video))
-                        self.download(video=video)
-                        self.queue.mark_as_done(video)
-                        self.logger.info('Finished:      {}'.format(video))
-                        self.enqueue_related_videos(video=video)
-                    else:
-                        self.enqueue_related_videos(video=video)
-                        self.queue.mark_as_referenced(video)
-                        self.logger.info('Referenced:    {}'.format(video))
-                except RetriableError:
-                    self.queue.enqueue_again(video)
-                    self.logger.info('Pending retry: {}'.format(video))
-                except LogInError:
-                    self.queue.mark_as_login_required(video)
-                    self.logger.info('LogInError:    {}'.format(video))
-            else:
-                if not self.is_daemon:
-                    self.logger.debug('This thread is out of work. Existing now...')
-                    break
-                time.sleep(1)
+
+        keep_running = True
+        while keep_running:
+            try:
+                keep_running = self.run_single_iteration()
+            except Exception as e:
+                self.logger.error(e)
+                keep_running = False
+
+    def run_single_iteration(self):
+        video = self.queue.peek_and_reserve()
+        if video:
+            self.logger.info('Start          {}'.format(video))
+            try:
+                vt = video.video_type
+                if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
+                    self.logger.info('Downloading:   {}'.format(video))
+                    self.download(video=video)
+                    self.queue.mark_as_done(video)
+                    self.logger.info('Finished:      {}'.format(video))
+                    self.enqueue_related_videos(video=video)
+                else:
+                    self.enqueue_related_videos(video=video)
+                    self.queue.mark_as_referenced(video)
+                    self.logger.info('Referenced:    {}'.format(video))
+            except RetriableError:
+                self.queue.enqueue_again(video)
+                self.logger.info('Pending retry: {}'.format(video))
+            except LogInError:
+                self.queue.mark_as_login_required(video)
+                self.logger.info('LogInError:    {}'.format(video))
+        else:
+            if not self.is_daemon:
+                self.logger.debug('This thread is out of work. Existing now...')
+                return False
+            time.sleep(1)
+        return True
 
     def download(self, video):
         ydl = CustomYoutubeDL(video, logger=self.logger)
