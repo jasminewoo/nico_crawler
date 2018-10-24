@@ -129,7 +129,7 @@ class GoogleDrive(StorageService):
             trials_remaining -= 1
             try:
                 self.service = build('drive', 'v3', http=creds.authorize(Http()))
-            except ServerNotFoundError:
+            except (ServerNotFoundError, TimeoutError):
                 # This may happen when the computer loses internet connection
                 log.debug('Initialization failed. trials_remaining={}'.format(trials_remaining))
                 time.sleep(2)
