@@ -30,11 +30,10 @@ class CyclicQueue:
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
     def pull_from_indexer(self):
-        log.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
-
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
-            log.debug('exiting pull_from_indexer because the local queue is sufficiently big')
             return
+
+        log.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
 
         pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
                                                        max_result_set_size=k_MAX_QUEUE_SIZE // 2)
