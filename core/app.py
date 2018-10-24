@@ -55,23 +55,10 @@ class AppDaemonMode(App):
         App.__init__(self)
         for thread in self.threads:
             thread.start()
-        self.detection_timer = RepeatedTimer(1, self.detect_new_requests)  # every second
         self.daily_trend_timer = RepeatedTimer(43200, self.explore_daily_trending_videos)  # every 12 hours
 
     def create_thread(self):
         return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True, is_crawl=True)
-
-    def detect_new_requests(self):
-        if not os.path.exists(k_REQUEST_FOLDER):
-            return
-        for item in os.listdir(k_REQUEST_FOLDER):
-            path = '{}/{}'.format(k_REQUEST_FOLDER, item)
-            if not os.path.isfile(path):
-                continue
-            with open(path, 'r') as fp:
-                for line in fp.readlines():
-                    self.queue.enqueue(url=line)
-            os.remove(path)
 
     def explore_daily_trending_videos(self):
         log.info('Enqueuing daily trends...')
