@@ -6,7 +6,7 @@ from core.video import Video
 
 
 class MyList:
-    def __init__(self, url, logger=None):
+    def __init__(self, url, logger):
         self.url = url
         self.logger = logger
 

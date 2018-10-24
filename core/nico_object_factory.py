@@ -9,7 +9,7 @@ class NicoObjectFactory:
         self.nico_object = None
         self.logger = logger
         if 'mylist' in url:
-            self.nico_object = MyList(url=url)
+            self.nico_object = MyList(url=url, logger=logger)
         elif 'search' in url:
             self.nico_object = Search(url=url)
         elif 'ranking' in url:
