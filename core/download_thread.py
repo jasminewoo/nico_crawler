@@ -53,7 +53,7 @@ class DownloadThread(Thread):
                 if not self.is_daemon:
                     log.debug('This thread is out of work. Existing now...')
                     break
-        time.sleep(1)
+                time.sleep(1)
 
     def download(self, video):
         ydl = CustomYoutubeDL(video)
