@@ -1,5 +1,4 @@
 import logging
-import os
 from abc import ABCMeta, abstractmethod
 
 from core import global_config
@@ -15,7 +14,7 @@ k_REQUEST_FOLDER = 'requests'
 
 class App(metaclass=ABCMeta):
     def __init__(self):
-        self.queue = CyclicQueue(indexer=_get_indexer())
+        self.queue = CyclicQueue(indexer=_get_indexer(), logger=log)
         self.storage = _get_storage()
         self.threads = self.create_thread_pool()
 

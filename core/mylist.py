@@ -1,16 +1,14 @@
 import json
-import logging
 
 import requests
 
 from core.video import Video
 
-log = logging.getLogger(__name__)
-
 
 class MyList:
-    def __init__(self, url):
+    def __init__(self, url, logger=None):
         self.url = url
+        self.logger = logger
 
     def __str__(self):
         return '/'.join(self.url.split('/')[-2:])
@@ -39,7 +37,7 @@ class MyList:
                 v = Video(video_id=id, mylist_count=mlc)
                 vids.append(v)
         elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str:
-            log.debug('Private mylist {}'.format(self.url))
+            self.logger.debug('Private mylist {}'.format(self.url))
         else:
             raise RuntimeError('Could not get data from {}'.format(self.url))
 

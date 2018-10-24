@@ -1,12 +1,9 @@
-import logging
 from multiprocessing import Lock
 
 from core.nico_object_factory import NicoObjectFactory
 from core.repeated_timer import RepeatedTimer
 from core.video import Video
 from indexer.indexer_service import Indexer
-
-log = logging.getLogger(__name__)
 
 k_MAX_QUEUE_SIZE = 100
 k_MAX_RETRY = 3
@@ -23,17 +20,18 @@ class QueueElement:
 
 
 class CyclicQueue:
-    def __init__(self, indexer=None):
+    def __init__(self, indexer, logger):
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
+        self.default_logger = logger
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
     def pull_from_indexer(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
 
-        log.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
+        self.default_logger.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
 
         pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
                                                        max_result_set_size=k_MAX_QUEUE_SIZE // 2)
@@ -44,7 +42,8 @@ class CyclicQueue:
         self._append_all(login_failed, requires_creds=True)
 
     def _append_all(self, video_ids, requires_creds=False):
-        log.debug('_append_all len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
+        self.default_logger.debug(
+            '_append_all len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
         self._lock.acquire()
         existing_video_ids = {}
         for qe in self._list:
@@ -57,12 +56,12 @@ class CyclicQueue:
                 self._list.append(qe)
         self._lock.release()
 
-    def enqueue(self, video=None, url=None, parent_video=None):
+    def enqueue(self, video=None, url=None, parent_video=None, logger=None):
         if (1 if video else 0) + (1 if url else 0) != 1:
             AssertionError('Only one parameter allowed')
 
         if url:
-            videos = NicoObjectFactory(url=url).get_videos()
+            videos = NicoObjectFactory(url=url, logger=self.default_logger).get_videos()
         else:
             videos = [video]
 
@@ -74,9 +73,11 @@ class CyclicQueue:
                 if len(self._list) <= k_MAX_QUEUE_SIZE:
                     self._list.append(QueueElement(video))
                 self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
-                log.info('Enqueued:      {}{}'.format(video.video_id, parent_str))
+                if logger:
+                    logger.info('Enqueued:      {}{}'.format(video.video_id, parent_str))
             else:
-                log.info('Duplicate:     {}{}'.format(video.video_id, parent_str))
+                if logger:
+                    logger.info('Duplicate:     {}{}'.format(video.video_id, parent_str))
         self._lock.release()
 
     def peek_and_reserve(self):

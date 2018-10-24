@@ -1,18 +1,21 @@
+import logging
 import os
 
 from youtube_dl import YoutubeDL
-import logging
 
 from core import global_config
 
-log = logging.getLogger(__name__)
+logging.getLogger('niconico').setLevel('CRITICAL')
+logging.getLogger('youtube_dl').setLevel('CRITICAL')
+
 k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 
 class CustomYoutubeDL(YoutubeDL):
-    def __init__(self, video):
+    def __init__(self, video, logger=None):
         YoutubeDL.__init__(self, params=get_ydl_options(video.requires_creds))
         self.video = video
+        self.log = logger
 
     def download(self):
         return YoutubeDL.download(self, [self.video.url])
@@ -38,7 +41,7 @@ class CustomYoutubeDL(YoutubeDL):
             os.remove(path)
 
 
-def get_ydl_options(requires_creds=False):
+def get_ydl_options(requires_creds=False, logger=None):
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)s-%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
@@ -46,21 +49,28 @@ def get_ydl_options(requires_creds=False):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
             'preferredquality': '320',
-        }],
-        'logger': SilentLogger()
+        }]
     }
+
+    if logger:
+        options['logger'] = SilentLogger(logger=logger)
+
     if requires_creds:
         options['username'] = global_config.instance['nico_username']
         options['password'] = global_config.instance['nico_password']
+
     return options
 
 
 class SilentLogger(object):
+    def __index__(self, logger):
+        self.log = logger
+
     def debug(self, msg):
-        log.debug(msg)
+        self.log.debug(msg)
 
     def warning(self, msg):
-        log.debug(msg)
+        self.log.debug(msg)
 
     def error(self, msg):
-        log.debug(msg)
+        self.log.debug(msg)
