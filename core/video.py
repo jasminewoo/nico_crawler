@@ -130,6 +130,7 @@ class Video:
                         idx_start = line.index('data-api-data="') + len('data-api-data="')
                         idx_end = line.index('" data-environment', idx_start)
                         self._video_json = json.loads(line[idx_start:idx_end])
+                        break
         return self._video_json
 
     @property
