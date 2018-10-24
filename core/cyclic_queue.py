@@ -8,7 +8,7 @@ from indexer.indexer_service import Indexer
 
 log = logging.getLogger(__name__)
 
-k_MAX_QUEUE_SIZE = 500
+k_MAX_QUEUE_SIZE = 100
 k_MAX_RETRY = 3
 
 
@@ -16,7 +16,7 @@ class QueueElement:
     def __init__(self, video):
         self.video = video
         self.is_available = True
-        self.trials_remaining = k_MAX_RETRY
+        self.trials_remaining = 1 + k_MAX_RETRY
 
     def __str__(self):
         return self.video.video_id
@@ -33,11 +33,13 @@ class CyclicQueue:
         log.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
 
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
+            log.debug('exiting pull_from_indexer because the local queue is sufficiently big')
             return
 
-        pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING, max_result_set_size=k_MAX_QUEUE_SIZE)
+        pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
+                                                       max_result_set_size=k_MAX_QUEUE_SIZE // 2)
         login_failed = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_LOGIN_REQUIRED,
-                                                            max_result_set_size=k_MAX_QUEUE_SIZE)
+                                                            max_result_set_size=k_MAX_QUEUE_SIZE // 2)
 
         self._append_all(pending)
         self._append_all(login_failed, requires_creds=True)
@@ -85,6 +87,7 @@ class CyclicQueue:
         for qe in self._list:
             if qe.is_available:
                 qe.is_available = False
+                qe.trials_remaining -= 1
                 to_return = qe.video
                 break
 
@@ -118,7 +121,6 @@ class CyclicQueue:
 
         qe = self.get_qe_by_video_id(video.video_id)
         qe.is_available = True
-        qe.trials_remaining -= 1
 
         self._list.remove(qe)
         if qe.trials_remaining > 0:
