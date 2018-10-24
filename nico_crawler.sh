@@ -7,6 +7,10 @@ if [ ${action} == "start" ] ; then
         python3 -m venv venv
     fi
 
+    if [[ -d logs ]]; then
+        rm -r logs
+    fi
+
     source venv/bin/activate
     pip3 install -r requirements.txt
     python3 nico_crawler.py
