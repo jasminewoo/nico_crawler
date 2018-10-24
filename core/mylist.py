@@ -31,13 +31,18 @@ class MyList:
                     line = line[idx_start:-2]
                     my_json = json.loads(line)
 
+            if not my_json:
+                raise RuntimeError("'Mylist.preload' tag found in html but with no json string")
+
             for item in my_json:
                 id = item['item_data']['video_id']
                 mlc = int(item['item_data']['mylist_counter'])
                 v = Video(video_id=id, mylist_count=mlc)
                 vids.append(v)
-        elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str:
+
+        elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str or 'ページが見つかりません' in html_str:
             self.logger.debug('Private mylist {}'.format(self.url))
+
         else:
             raise RuntimeError('Could not get data from {}'.format(self.url))
 
