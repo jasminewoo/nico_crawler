@@ -10,6 +10,7 @@ from youtube_dl.utils import ExtractorError, DownloadError
 
 from core import global_config, logging_utils
 from core.custom_youtube_dl import CustomYoutubeDL
+from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.nico_object_factory import NicoObjectFactory
 from core.video import Video
 
@@ -49,10 +50,17 @@ class DownloadThread(Thread):
                     self.queue.mark_as_done(video)
                     self.logger.info('Finished:      {}'.format(video))
                     self.enqueue_related_videos(video=video)
-                else:
+                elif vt == Video.k_VIDEO_TYPE_VOCALOID_ORG:
                     self.enqueue_related_videos(video=video)
                     self.queue.mark_as_referenced(video)
                     self.logger.debug('Referenced:    {}'.format(video))
+                else:
+                    self.queue.mark_as_referenced(video)
+                    self.logger.debug('Skipped:       {}'.format(video))
+            except ServiceUnderMaintenanceError:
+                self.queue.enqueue_again(video)
+                self.logger.info('Service under maintenance; thread going to sleep for 30 min...')
+                time.sleep(1800)
             except RetriableError:
                 self.queue.enqueue_again(video)
                 self.logger.info('Pending retry: {}'.format(video))

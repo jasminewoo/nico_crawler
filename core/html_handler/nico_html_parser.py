@@ -1,6 +1,7 @@
 import logging
 from abc import abstractmethod
 from html.parser import HTMLParser
+from html import unescape
 
 import requests
 
@@ -18,6 +19,12 @@ class NicoHTMLParser(HTMLParser):
             r = requests.get(url)
             self.status_code = r.status_code
             self.html_string = str(r.text)
+
+            unescaped = unescape(self.html_string)
+
+            if self.status_code == 503 or 'ただいまメンテナンス中です' in unescaped or 'Currently under maintenance' in unescaped:
+                raise ServiceUnderMaintenanceError
+
         elif html_string:
             self.html_string = html_string
         else:
@@ -54,3 +61,7 @@ class NicoHTMLParser(HTMLParser):
     @abstractmethod
     def is_available(self):
         pass
+
+
+class ServiceUnderMaintenanceError(Exception):
+    pass
