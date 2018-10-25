@@ -1,4 +1,5 @@
 import sys
+import logging
 from multiprocessing import Lock
 
 from core.repeated_timer import RepeatedTimer
@@ -7,6 +8,8 @@ from indexer.indexer_service import Indexer
 
 k_MAX_QUEUE_SIZE = 300
 k_MAX_RETRY = 3
+
+default_logger = logging.getLogger(__name__)
 
 
 class QueueElement:
@@ -20,11 +23,10 @@ class QueueElement:
 
 
 class CyclicQueue:
-    def __init__(self, indexer, logger):
+    def __init__(self, indexer):
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        self.default_logger = logger
         self.cached_indexer = None
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
         self.cache_indexer()
@@ -33,13 +35,12 @@ class CyclicQueue:
         self.cached_indexer = self.indexer.get_all_video_ids_as_set()
         mem_usage = sys.getsizeof(self.indexer)
         msg = 'cached_indexer len={} mem_usage={}MB'.format(len(self.cached_indexer), mem_usage // 1000000)
-        self.default_logger.info(msg)
 
     def pull_from_indexer(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
 
-        self.default_logger.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
+        default_logger.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
 
         pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
                                                        max_result_set_size=k_MAX_QUEUE_SIZE // 2)
@@ -50,7 +51,7 @@ class CyclicQueue:
         self._append_all(login_failed, requires_creds=True)
 
     def _append_all(self, video_ids, requires_creds=False):
-        self.default_logger.debug(
+        default_logger.debug(
             '_append_all len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
         self._lock.acquire()
         existing_video_ids = {}
