@@ -9,10 +9,13 @@ log = logging.getLogger(__name__)
 if __name__ == '__main__':
     config_logging()
 
-    if len(sys.argv) > 1:
-        log.info('AppSingleMode')
-        AppSingleMode(url=sys.argv[1])
-        log.info('Exiting...')
-    else:
-        log.info('AppDaemonMode')
-        AppDaemonMode()
+    try:
+        if len(sys.argv) > 1:
+            log.info('AppSingleMode')
+            AppSingleMode(url=sys.argv[1])
+            log.info('Exiting...')
+        else:
+            log.info('AppDaemonMode')
+            AppDaemonMode()
+    except Exception as e:
+        log.error(e)
