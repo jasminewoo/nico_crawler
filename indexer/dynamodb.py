@@ -1,19 +1,18 @@
+import logging
 import time
 from datetime import datetime, tzinfo, timedelta
 
-import botocore
+import boto3
 from boto3.dynamodb.conditions import Key
 
 from indexer.indexer_service import Indexer
-import boto3
-
-import logging
 
 logging.getLogger('boto').setLevel('CRITICAL')
 logging.getLogger('boto3').setLevel('CRITICAL')
 logging.getLogger('botocore').setLevel('CRITICAL')
 log = logging.getLogger(__name__)
 
+k_LAST_EVALUATED_KEY = 'LastEvaluatedKey'
 k_VIDEO_ID = 'video_id'
 k_VIDEO_STATUS = 'video_status'
 k_LAST_MODIFIED_UTC = 'last_modified_utc'
@@ -72,21 +71,24 @@ class DynamoDbIndexer(Indexer):
 
     def get_all_video_ids_as_set(self):
         to_return = set()
-        metadata = {'LastEvaluatedKey': None}
+        metadata = {k_LAST_EVALUATED_KEY: None}
         while True:
             try:
-                if metadata['LastEvaluatedKey']:
-                    response = self.table.scan(ExclusiveStartKey=metadata['LastEvaluatedKey'])
+                if metadata[k_LAST_EVALUATED_KEY]:
+                    response = self.table.scan(ExclusiveStartKey=metadata[k_LAST_EVALUATED_KEY])
                 else:
                     response = self.table.scan()
                 if response['Count'] > 0:
                     to_return |= set(map(lambda x: x[k_VIDEO_ID], response['Items']))
-                    metadata = {'LastEvaluatedKey': response['LastEvaluatedKey']}
+                    metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]
+                    log.info('get_all_video_ids_as_set len(set)={}'.format(len(to_return)))
                 else:
+                    log.info('No more rows')
                     break
             except Exception as e:
                 if 'ProvisionedThroughputExceededException' in str(e):
                     # This is a weird way of handling exception, but I can't seem to reference botocore.errorfactory.ProvisionedThroughputExceededException
+                    log.debug('get_all_video_ids_as_set ProvisionedThroughputExceededException')
                     time.sleep(15)
                 else:
                     raise
