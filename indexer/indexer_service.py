@@ -25,6 +25,10 @@ class Indexer(metaclass=ABCMeta):
     def get_video_ids_by_status(self, status, max_result_set_size=None):
         pass
 
+    @abstractmethod
+    def get_all_video_ids(self):
+        pass
+
     def exists(self, video_id):
         status = self.get_status(video_id=video_id)
         return status != self.k_STATUS_NOT_FOUND

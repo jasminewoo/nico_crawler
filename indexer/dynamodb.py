@@ -90,6 +90,14 @@ class DynamoDbIndexer(Indexer):
         # read/write capacity 1
         pass
 
+    def get_all_video_ids(self):
+        response = self.table.query()
+        if 'Items' in response:
+            items = response['Items']
+            return set(map(lambda x: x[k_VIDEO_ID], items))
+        else:
+            return set()
+
 
 class SimpleUTC(tzinfo):
     def tzname(self, **kwargs):
