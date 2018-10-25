@@ -1,8 +1,7 @@
 # nico_crawler
 
 - Python ≥ 3.6
-- Crawls Nicovideo.jp and downloads '歌ってみた' audio files
-- Failed downloads get added back to the end of the queue so they get tried again
+- Crawls [nicovideo.jp](https://www.nicovideo.jp) and downloads '歌ってみた' audio files
 - Uses Amazon DynamoDB to keep track of the downloads
 - (Optional) Downloaded files get uploaded to Google Drive and get deleted from local disk.
 
