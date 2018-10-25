@@ -4,7 +4,7 @@ from core.repeated_timer import RepeatedTimer
 from core.video import Video
 from indexer.indexer_service import Indexer
 
-k_MAX_QUEUE_SIZE = 100
+k_MAX_QUEUE_SIZE = 300
 k_MAX_RETRY = 3
 
 
@@ -35,7 +35,7 @@ class CyclicQueue:
         pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
                                                        max_result_set_size=k_MAX_QUEUE_SIZE // 2)
         login_failed = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_LOGIN_REQUIRED,
-                                                            max_result_set_size=k_MAX_QUEUE_SIZE // 2)
+                                                            max_result_set_size=k_MAX_QUEUE_SIZE // 10)
 
         self._append_all(pending)
         self._append_all(login_failed, requires_creds=True)
