@@ -18,9 +18,12 @@ class NicoObjectFactory:
             self.nico_object = Video(url=url)
 
     def get_videos(self, min_mylist=0):
-        self.logger.debug('Getting videos for {}'.format(self.nico_object))
-        vids = self.nico_object.videos if type(self.nico_object) is not Video else [self.nico_object]
-        self.logger.debug('len(vids) = {}'.format(len(vids)))
+        is_video = type(self.nico_object) is Video
+        if not is_video:
+            self.logger.debug('Getting videos for {}'.format(self.nico_object))
+        vids = self.nico_object.videos if not is_video else [self.nico_object]
+        if not is_video:
+            self.logger.debug('len(vids) = {}'.format(len(vids)))
 
         if min_mylist == 0:
             return vids

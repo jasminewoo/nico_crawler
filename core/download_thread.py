@@ -89,8 +89,8 @@ class DownloadThread(Thread):
         self.logger.debug('{}.video_type={}'.format(video, video.video_type))
         for url in video.related_urls:
             self.logger.debug('Processing url={}'.format(url))
-            related_videos = NicoObjectFactory(url=url, logger=self.logger).get_videos(
-                min_mylist=global_config.instance['minimum_mylist'])
+            factory = NicoObjectFactory(url=url, logger=self.logger)
+            related_videos = factory.get_videos(min_mylist=global_config.instance['minimum_mylist'])
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             for rv in related_videos:
                 self.queue.enqueue(video=rv, parent_video=video, logger=self.logger)
