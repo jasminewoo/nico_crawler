@@ -88,6 +88,7 @@ class DynamoDbIndexer(Indexer):
 
                 metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]
 
+                time.sleep(10)
             except Exception as e:
                 if 'ProvisionedThroughputExceededException' in str(e):
                     # This is a weird way of handling exception, but I can't seem to reference botocore.errorfactory.ProvisionedThroughputExceededException
