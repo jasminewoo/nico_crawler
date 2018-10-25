@@ -92,8 +92,8 @@ class DownloadThread(Thread):
             factory = NicoObjectFactory(url=url, logger=self.logger)
             related_videos = factory.get_videos(min_mylist=global_config.instance['minimum_mylist'])
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
-            for rv in related_videos:
-                self.queue.enqueue(video=rv, parent_video=video, logger=self.logger)
+            results = self.queue.enqueue(related_videos)
+            self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))
         self.logger.info('Crawl Done:    {}'.format(video))
 
 

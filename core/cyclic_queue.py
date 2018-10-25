@@ -56,29 +56,20 @@ class CyclicQueue:
                 self._list.append(qe)
         self._lock.release()
 
-    def enqueue(self, video=None, url=None, parent_video=None, logger=None):
-        if (1 if video else 0) + (1 if url else 0) != 1:
-            AssertionError('Only one parameter allowed')
-
-        if url:
-            videos = NicoObjectFactory(url=url, logger=self.default_logger).get_videos()
-        else:
-            videos = [video]
-
+    def enqueue(self, videos):
+        results = {'enqueued': 0, 'skipped': 0}
         self._lock.acquire()
         for video in videos:
-            parent_str = '' if not parent_video else ' (Parent: {})'.format(parent_video)
             exists = self.indexer.exists(video_id=video.video_id)
             if not exists:
                 if len(self._list) <= k_MAX_QUEUE_SIZE:
                     self._list.append(QueueElement(video))
                 self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
-                if logger:
-                    logger.info('Enqueued:      {}{}'.format(video.video_id, parent_str))
+                results['enqueued'] = results['enqueued'] + 1
             else:
-                if logger:
-                    logger.info('Duplicate:     {}{}'.format(video.video_id, parent_str))
+                results['skipped'] = results['skipped'] + 1
         self._lock.release()
+        return results
 
     def peek_and_reserve(self):
         self._lock.acquire()

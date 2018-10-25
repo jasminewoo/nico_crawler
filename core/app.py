@@ -4,11 +4,12 @@ from abc import ABCMeta, abstractmethod
 from core import global_config
 from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
+from core.nico_object_factory import NicoObjectFactory
 from core.repeated_timer import RepeatedTimer
 from indexer.dynamodb import DynamoDbIndexer
 from storage.google_drive import GoogleDrive
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 k_REQUEST_FOLDER = 'requests'
 
 
@@ -38,7 +39,8 @@ class AppSingleMode(App):
         return DownloadThread(queue=self.queue, storage=self.storage)
 
     def _process(self, url):
-        self.queue.enqueue(url=url)
+        vids = NicoObjectFactory(url=url, logger=logger).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+        self.queue.enqueue(vids)
         for thread in self.threads:
             thread.start()
         self.wait_and_quit()
@@ -60,17 +62,19 @@ class AppDaemonMode(App):
         return DownloadThread(queue=self.queue, storage=self.storage, is_daemon=True, is_crawl=True)
 
     def explore_daily_trending_videos(self):
-        log.info('Enqueuing daily trends...')
-        self.queue.enqueue(url='https://www.nicovideo.jp/ranking/fav/daily/sing')
+        logger.info('Enqueuing daily trends...')
+        url = 'https://www.nicovideo.jp/ranking/fav/daily/sing'
+        vids = NicoObjectFactory(url=url, logger=logger).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+        self.queue.enqueue(vids)
 
 
 def _get_storage():
     if 'google_drive_folder_id' in global_config.instance:
         storage = GoogleDrive(config=global_config.instance)
-        log.info('Initialized storage object with config')
+        logger.info('Initialized storage object with config')
         return storage
     storage = GoogleDrive()
-    log.info('Initialized storage object with default settings')
+    logger.info('Initialized storage object with default settings')
     return storage
 
 
