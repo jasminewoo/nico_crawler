@@ -43,11 +43,6 @@ class Video:
         return urls
 
     @property
-    def requires_login(self):
-        return self.requires_creds or \
-               'メールアドレスまたは電話番号' in self.html
-
-    @property
     def url(self):
         return 'http://www.nicovideo.jp/watch/' + self.video_id
 
@@ -75,17 +70,19 @@ class Video:
             logger.debug('{} has no description'.format(self.video_id))
 
     @property
-    def is_deleted_or_private(self):
-        return self.http_status_code == 403 or \
+    def is_available(self):
+        unavailable = self.http_status_code == 403 or \
                self.http_status_code == 404 or \
                'ページが見つかりませんでした' in self.html or \
                'お探しの動画は再生できません' in self.html or \
                'Unable to play video' in self.html or \
                '動画が投稿されている公開コミュニティ一覧' in self.html or \
-               'チャンネル会員専用動画' in self.html
+               'チャンネル会員専用動画' in self.html or \
+               'メールアドレスまたは電話番号' in self.html
+        return not unavailable
 
     def get_mylist_count(self, logger):
-        if self.is_deleted_or_private:
+        if not self.is_available:
             logger.debug('This video is unavailable')
             return 0
 
