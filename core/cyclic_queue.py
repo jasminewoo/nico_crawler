@@ -23,6 +23,7 @@ class CyclicQueue:
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
+        self.cached_indexer = set()
         self.default_logger = logger
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
@@ -59,11 +60,12 @@ class CyclicQueue:
         results = {'enqueued': 0, 'skipped': 0}
         self._lock.acquire()
         for video in videos:
-            exists = self.indexer.exists(video_id=video.video_id)
+            exists = video.video_id in self.cached_indexer or self.indexer.exists(video_id=video.video_id)
             if not exists:
                 if len(self._list) <= k_MAX_QUEUE_SIZE:
                     self._list.append(QueueElement(video))
                 self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
+                self.cached_indexer.add(video.video_id)
                 results['enqueued'] = results['enqueued'] + 1
             else:
                 results['skipped'] = results['skipped'] + 1
