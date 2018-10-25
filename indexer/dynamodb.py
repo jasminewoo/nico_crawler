@@ -91,8 +91,8 @@ class DynamoDbIndexer(Indexer):
             except Exception as e:
                 if 'ProvisionedThroughputExceededException' in str(e):
                     # This is a weird way of handling exception, but I can't seem to reference botocore.errorfactory.ProvisionedThroughputExceededException
-                    log.info('DynamoDB Read Capacity exceeded... retrying in 15s')
-                    time.sleep(15)
+                    log.info('DynamoDB Read Capacity exceeded... retrying in 30s')
+                    time.sleep(30)
                 else:
                     raise
 
