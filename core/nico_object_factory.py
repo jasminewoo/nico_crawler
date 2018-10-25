@@ -27,8 +27,7 @@ class NicoObjectFactory:
 
         to_return = []
         for vid in vids:
-            mlc = vid.get_mylist_count(logger=self.logger)
-            self.logger.debug('{}.mylist_count={}'.format(vid, mlc))
-            if mlc >= min_mylist:
+            self.logger.debug('{}.mylist_count={}'.format(vid, vid.mylist_count))
+            if vid.mylist_count >= min_mylist:
                 to_return.append(vid)
         return to_return

@@ -1,11 +1,7 @@
-import html as html_lib
-import json
-import logging
 import re
 
-import requests
+from core.video_html_parser import VideoHTMLParser
 
-logging.getLogger('urllib3').setLevel('CRITICAL')
 url_regex_str = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
 
@@ -15,22 +11,20 @@ class Video:
     k_VIDEO_TYPE_UNKNOWN = 'unknown'
 
     def __init__(self, video_id=None, url=None, mylist_count=None):
-        if (1 if video_id else 0) + (1 if url else 0) != 1:
-            raise AssertionError('Need one of video_id and url')
         if url:
             self.video_id = url.split('/')[-1].split('?')[0]
         if video_id:
             self.video_id = video_id
-        self._http_response = None
-        self._video_json = None
+        self._html = None
         self.requires_creds = False
         self._mylist_count = mylist_count
 
-    def get_related_urls(self, logger):
+    @property
+    def related_urls(self):
         urls = []
         vt = self.video_type
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
-            matches = re.findall(url_regex_str, self.get_description(logger=logger))
+            matches = re.findall(url_regex_str, self.html.description)
             for url in matches:
                 if 'nicovideo' not in url:
                     continue
@@ -48,7 +42,10 @@ class Video:
 
     @property
     def video_type(self):
-        tags = self.tags
+        tags = self.html.tags
+        if not tags:
+            raise ValueError('{} has no tags'.format(self))
+
         if '歌ってみた' in tags:
             return self.k_VIDEO_TYPE_UTATTEMITA
         elif 'VOCALIOD' in tags or 'Vocaloid' in tags or 'vocaloid' in tags:
@@ -56,92 +53,15 @@ class Video:
         else:
             return self.k_VIDEO_TYPE_UNKNOWN
 
-    def get_description(self, logger):
-        if self.video_json:
-            return self.video_json['video']['description']
-
-        # tag1 = '<meta itemprop="description" content="'
-        tag2 = '<p class="VideoDescription-text" itemprop="description">'
-        if tag2 in self.html:
-            idx_start = self.html.index(tag2) + len(tag2)
-            idx_end = self.html.index('\n', idx_start) - len('</p>')
-            return self.html[idx_start:idx_end]
-        else:
-            logger.debug('{} has no description'.format(self.video_id))
-
     @property
-    def is_available(self):
-        unavailable = self.http_status_code == 403 or \
-               self.http_status_code == 404 or \
-               'ページが見つかりませんでした' in self.html or \
-               'お探しの動画は再生できません' in self.html or \
-               'Unable to play video' in self.html or \
-               '動画が投稿されている公開コミュニティ一覧' in self.html or \
-               'チャンネル会員専用動画' in self.html or \
-               'メールアドレスまたは電話番号' in self.html
-        return not unavailable
-
-    def get_mylist_count(self, logger):
-        if not self.is_available:
-            logger.debug('This video is unavailable')
-            return 0
-
-        if not self._mylist_count:
-            logger.debug('{} determining mylist_count...'.format(self))
-            if self.video_json:
-                self._mylist_count = int(self.video_json['video']['mylistCount'])
-            else:
-                if 'mylistCount' in self.html:
-                    idx_start = self.html.index('mylistCount')
-                    idx_start = self.html.index(':', idx_start)
-                    idx_end = self.html.index(',', idx_start)
-                    self._mylist_count = int(self.html[idx_start + 1:idx_end])
-                elif 'MylistCountMeta-counter' in self.html:
-                    start_str = 'MylistCountMeta-counter"><span class="FormattedNumber">'
-                    idx_start = self.html.index(start_str) + len(start_str)
-                    idx_end = self.html.index('</span>', idx_start)
-                    self._mylist_count = int(self.html[idx_start:idx_end].replace(',', ''))
-                else:
-                    raise ValueError('{} has no mylist count; {}'.format(self.video_id, self.html))
-        return self._mylist_count
-
-    @property
-    def http_status_code(self):
-        if not self._http_response:
-            self._http_response = requests.get(self.url)
-        return self._http_response.status_code
+    def mylist_count(self):
+        return self._mylist_count if self._mylist_count else self.html.mylist_count
 
     @property
     def html(self):
-        if not self._http_response:
-            self._http_response = requests.get(self.url)
-        return html_lib.unescape(str(self._http_response.text)) + str(self._http_response)
-
-    @property
-    def video_json(self):
-        if not self._video_json:
-            if self.html:
-                for line in self.html.split('\n'):
-                    json_tag = '<div id="js-initial-watch-data"'
-                    if json_tag in line:
-                        idx_start = line.index('data-api-data="') + len('data-api-data="')
-                        idx_end = line.index('" data-environment', idx_start)
-                        self._video_json = json.loads(line[idx_start:idx_end])
-                        break
-        return self._video_json
-
-    @property
-    def tags(self):
-        if self.video_json:
-            return list(map(lambda x: x['name'], self.video_json['tags']))
-
-        lines = self.html.split('\n')
-        for line in lines:
-            line = line.strip().strip('\t').strip()
-            if line.startswith('<meta name="keywords"'):
-                idx_start = len('<meta name="keywords" content="')
-                return line[idx_start:-2].split(',')
-        return []
+        if not self._html:
+            self._html = VideoHTMLParser(url=self.url)
+        return self._html
 
     def __str__(self):
         return self.video_id

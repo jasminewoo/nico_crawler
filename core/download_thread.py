@@ -87,7 +87,7 @@ class DownloadThread(Thread):
             return
         self.logger.info('Crawling:      {}'.format(video))
         self.logger.debug('{}.video_type={}'.format(video, video.video_type))
-        for url in video.get_related_urls(logger=self.logger):
+        for url in video.related_urls:
             self.logger.debug('Processing url={}'.format(url))
             related_videos = NicoObjectFactory(url=url, logger=self.logger).get_videos(
                 min_mylist=global_config.instance['minimum_mylist'])
