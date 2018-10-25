@@ -37,14 +37,8 @@ class DynamoDbIndexer(Indexer):
             IndexName='video_status-index',
             KeyConditionExpression=Key(k_VIDEO_STATUS).eq(status)
         )
-
-        if 'Items' in response:
-            if not max_result_set_size or max_result_set_size > len(response['Items']):
-                return response['Items']
-            else:
-                return response['Items'][:max_result_set_size]
-        else:
-            return []
+        len_limit = min(response['Count'], max_result_set_size if max_result_set_size else 1000000)
+        return response['Items'][:len_limit]
 
     def get_status(self, video_id):
         item = self._get_item(video_id=video_id)
