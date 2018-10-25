@@ -16,8 +16,6 @@ k_VIDEO_ID = 'video_id'
 k_VIDEO_STATUS = 'video_status'
 k_LAST_MODIFIED_UTC = 'last_modified_utc'
 
-k_SEARCH_LIMIT = 50000
-
 
 class DynamoDbIndexer(Indexer):
     def __init__(self, config=None):
@@ -42,14 +40,9 @@ class DynamoDbIndexer(Indexer):
         return video_ids
 
     def _get_items_by_status(self, status, max_result_set_size=None):
-        if max_result_set_size > k_SEARCH_LIMIT:
-            msg = '_get_items_by_status assertion: {} <= {} failed'.format(max_result_set_size, k_SEARCH_LIMIT)
-            raise AssertionError(msg)
-
         response = self.table.query(
             IndexName='video_status-index',
-            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(status),
-            Limit=k_SEARCH_LIMIT
+            KeyConditionExpression=Key(k_VIDEO_STATUS).eq(status)
         )
 
         if 'Items' in response:
