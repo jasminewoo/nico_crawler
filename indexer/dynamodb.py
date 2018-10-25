@@ -80,7 +80,7 @@ class DynamoDbIndexer(Indexer):
         pass
 
     def get_all_video_ids_as_set(self):
-        response = self.table.query()
+        response = self.table.scan()
         if 'Items' in response:
             items = response['Items']
             return set(map(lambda x: x[k_VIDEO_ID], items))
