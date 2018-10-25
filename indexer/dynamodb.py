@@ -29,15 +29,8 @@ class DynamoDbIndexer(Indexer):
         self.table = ddb.Table('nico_crawler')
 
     def get_video_ids_by_status(self, status, max_result_set_size=None):
-        response = self._get_items_by_status(status, max_result_set_size=max_result_set_size)
-
-        video_ids = []
-        for item in response:
-            if max_result_set_size and len(video_ids) == max_result_set_size:
-                break
-            video_ids.append(item[k_VIDEO_ID])
-
-        return video_ids
+        items = self._get_items_by_status(status, max_result_set_size=max_result_set_size)
+        return list(map(lambda x: x[k_VIDEO_ID], items))
 
     def _get_items_by_status(self, status, max_result_set_size=None):
         response = self.table.query(
@@ -46,7 +39,10 @@ class DynamoDbIndexer(Indexer):
         )
 
         if 'Items' in response:
-            return response['Items']
+            if not max_result_set_size or max_result_set_size > len(response['Items']):
+                return response['Items']
+            else:
+                return response['Items'][:max_result_set_size]
         else:
             return []
 
