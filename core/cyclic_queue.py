@@ -1,6 +1,5 @@
 from multiprocessing import Lock
 
-from core.nico_object_factory import NicoObjectFactory
 from core.repeated_timer import RepeatedTimer
 from core.video import Video
 from indexer.indexer_service import Indexer
