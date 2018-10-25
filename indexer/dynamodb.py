@@ -74,11 +74,6 @@ class DynamoDbIndexer(Indexer):
             ReturnValues="UPDATED_NEW"
         )
 
-    def _create_table(self):
-        # video_status-index
-        # read/write capacity 1
-        pass
-
     def get_all_video_ids_as_set(self):
         response = self.table.scan()
         if 'Items' in response:
