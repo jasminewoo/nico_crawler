@@ -34,9 +34,8 @@ class VideoParserTest(unittest.TestCase):
 
     def test_tags_without_json(self):
         p = get_parser(k_UTATTEMITA_WITHOUT_JSON)
-        tags = p.html_vars['tags'].data
-        self.assertIsNotNone(tags)
-        self.assertEqual('歌ってみた', tags[0])
+        self.assertIsNotNone(p.tags)
+        self.assertEqual('歌ってみた', p.tags[0])
 
     def test_tags_with_json(self):
         p = get_parser(k_UTATTEMITA_WITH_JSON)

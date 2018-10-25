@@ -40,7 +40,10 @@ class VideoHTMLParser(NicoHTMLParser):
     def tags(self):
         if not self.is_available:
             return []
-        return list(map(lambda x: x['name'], self.video_json['tags'])) if self.video_json else self._tags_backup
+        if self.video_json:
+            return list(map(lambda x: x['name'], self.video_json['tags']))
+        else:
+            return self.html_vars['tags'].data
 
     @property
     def mylist_count(self):
