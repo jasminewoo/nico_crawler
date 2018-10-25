@@ -26,10 +26,10 @@ class CyclicQueue:
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
         self.cached_indexer = self.indexer.get_all_video_ids_as_set()
+        self.replenish_timer = RepeatedTimer(30, self.replenish)
 
-    def pull_from_indexer(self):
+    def replenish(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
 
