@@ -1,4 +1,3 @@
-import sys
 import logging
 from multiprocessing import Lock
 
@@ -27,14 +26,8 @@ class CyclicQueue:
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        self.cached_indexer = None
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
-        self.cache_indexer()
-
-    def cache_indexer(self):
         self.cached_indexer = self.indexer.get_all_video_ids_as_set()
-        mem_usage = sys.getsizeof(self.indexer)
-        msg = 'cached_indexer len={} mem_usage={}MB'.format(len(self.cached_indexer), mem_usage // 1000000)
 
     def pull_from_indexer(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
