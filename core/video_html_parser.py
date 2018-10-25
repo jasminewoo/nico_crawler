@@ -33,10 +33,14 @@ class VideoHTMLParser(HTMLParser):
 
     @property
     def description(self):
+        if not self.is_available:
+            return ''
         return self.video_json['video']['description'] if self.video_json else self._description_backup
 
     @property
     def tags(self):
+        if not self.is_available:
+            return []
         return list(map(lambda x: x['name'], self.video_json['tags'])) if self.video_json else self._tags_backup
 
     def handle_starttag(self, tag, attrs):
