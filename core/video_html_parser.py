@@ -89,6 +89,7 @@ class VideoHTMLParser(HTMLParser):
                       'ページが見つかりませんでした' in self.html_string or \
                       'お探しの動画は再生できません' in self.html_string or \
                       'Unable to play video' in self.html_string or \
+                      'This video does not exist, or has been deleted' in self.html_string or \
                       '動画が投稿されている公開コミュニティ一覧' in self.html_string or \
                       'チャンネル会員専用動画' in self.html_string or \
                       'メールアドレスまたは電話番号' in self.html_string
