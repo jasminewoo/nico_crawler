@@ -14,6 +14,8 @@ class VideoHTMLParser(HTMLParser):
         self.video_json = None
         self.title_detected = False
         self.directed_to_login_page = False
+        self.message_title_detected = False
+        self._is_deleted_or_private = False
         self.mylist_count_detection_phase = 0
         self._mylist_count_backup = None
         self._tags_backup = None
@@ -22,10 +24,10 @@ class VideoHTMLParser(HTMLParser):
         if url:
             r = requests.get(url)
             self.status_code = r.status_code
-            self.html_string = str(r.text)
+            self.html_string = unescape(str(r.text))
         elif html_string:
             self.status_code = 0
-            self.html_string = html_string
+            self.html_string = unescape(html_string)
         else:
             raise AssertionError('No info provided')
 
@@ -69,6 +71,11 @@ class VideoHTMLParser(HTMLParser):
             if 'itemprop' in attrs and 'content' in attrs:
                 if attrs['itemprop'] == 'description':
                     self._description_backup = unescape(attrs['content'])
+        elif tag == 'p':
+            attrs = dict(attrs)
+            if 'class' in attrs:
+                if attrs['class'] == 'messageTitle':
+                    self.message_title_detected = True
 
     def handle_data(self, data):
         if self.title_detected:
@@ -77,13 +84,18 @@ class VideoHTMLParser(HTMLParser):
         elif self.mylist_count_detection_phase == 2:
             self._mylist_count_backup = int(data.replace(',', ''))
             self.mylist_count_detection_phase = 0
+        elif self.message_title_detected:
+            if data == 'お探しの動画は再生できません':
+                self._is_deleted_or_private = True
+            self.message_title_detected = False
 
     def error(self, message):
         raise RuntimeError(message)
 
     @property
     def is_available(self):
-        unavailable = self.status_code == 403 or \
+        unavailable = self._is_deleted_or_private or \
+                      self.status_code == 403 or \
                       self.status_code == 404 or \
                       self.directed_to_login_page or \
                       'ページが見つかりませんでした' in self.html_string or \
