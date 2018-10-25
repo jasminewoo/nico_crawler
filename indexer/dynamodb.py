@@ -78,13 +78,16 @@ class DynamoDbIndexer(Indexer):
                     response = self.table.scan(ExclusiveStartKey=metadata[k_LAST_EVALUATED_KEY])
                 else:
                     response = self.table.scan()
-                if response['Count'] > 0:
-                    to_return |= set(map(lambda x: x[k_VIDEO_ID], response['Items']))
-                    metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]
-                    log.info('get_all_video_ids_as_set len(set)={}'.format(len(to_return)))
-                else:
+
+                to_return |= set(map(lambda x: x[k_VIDEO_ID], response['Items']))
+                log.info('get_all_video_ids_as_set len(set)={}'.format(len(to_return)))
+
+                if response['Count'] == 0 or k_LAST_EVALUATED_KEY not in response:
                     log.info('No more rows')
                     break
+
+                metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]
+
             except Exception as e:
                 if 'ProvisionedThroughputExceededException' in str(e):
                     # This is a weird way of handling exception, but I can't seem to reference botocore.errorfactory.ProvisionedThroughputExceededException
