@@ -22,7 +22,7 @@ class Indexer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_video_ids_by_status(self, max_result_set_size=None):
+    def get_video_ids_by_status(self, status, max_result_set_size=None):
         pass
 
     def exists(self, video_id):
