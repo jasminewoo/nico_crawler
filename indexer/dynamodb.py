@@ -90,7 +90,7 @@ class DynamoDbIndexer(Indexer):
         # read/write capacity 1
         pass
 
-    def get_all_video_ids(self):
+    def get_all_video_ids_as_set(self):
         response = self.table.query()
         if 'Items' in response:
             items = response['Items']

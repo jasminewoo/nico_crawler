@@ -26,7 +26,7 @@ class Indexer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_all_video_ids(self):
+    def get_all_video_ids_as_set(self):
         pass
 
     def exists(self, video_id):
