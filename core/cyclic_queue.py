@@ -27,6 +27,7 @@ class CyclicQueue:
         self.default_logger = logger
         self.cached_indexer = None
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
+        self.cache_indexer()
 
     def cache_indexer(self):
         self.cached_indexer = self.indexer.get_all_video_ids_as_set()
