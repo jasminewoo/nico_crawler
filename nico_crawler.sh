@@ -17,12 +17,10 @@ if [ ${action} == "start" ] ; then
     deactivate
 elif [ ${action} == "download" ] ; then
     url=$2
-    if [[ ! -d requests ]]; then
-        mkdir requests
-    fi
-
-    timestamp=`date +%s`
-    echo ${url} > requests/${timestamp}
+    source venv/bin/activate
+    pip3 install -r requirements.txt
+    python3 nico_crawler.py ${url}
+    deactivate
 elif [ ${action} == "kill" ] ; then
     pid=`ps aux | grep crawler.py | grep -v grep | awk '{print $2}'`
     if [ ${pid} -ne 0 ]; then
