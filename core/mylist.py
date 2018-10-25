@@ -42,7 +42,8 @@ class MyList:
 
         elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str or 'ページが見つかりません' in html_str:
             self.logger.debug('Private mylist {}'.format(self.url))
-
+        elif r.status_code == 503:
+            self.logger.debug('Service in maintenance')
         else:
             raise RuntimeError('Could not get data from {}; {}'.format(self.url, html_str))
 
