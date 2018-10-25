@@ -83,7 +83,7 @@ class DynamoDbIndexer(Indexer):
                 log.info('get_all_video_ids_as_set len(set)={}'.format(len(to_return)))
 
                 if response['Count'] == 0 or k_LAST_EVALUATED_KEY not in response:
-                    log.info('No more rows')
+                    log.info('get_all_video_ids_as_set No more rows')
                     break
 
                 metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]
