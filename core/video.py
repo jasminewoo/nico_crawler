@@ -1,6 +1,6 @@
 import re
 
-from core.video_html_parser import VideoHTMLParser
+from core.html_handler.video_html_parser import VideoHTMLParser
 
 url_regex_str = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
