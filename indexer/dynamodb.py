@@ -1,5 +1,7 @@
+import time
 from datetime import datetime, tzinfo, timedelta
 
+import botocore
 from boto3.dynamodb.conditions import Key
 
 from indexer.indexer_service import Indexer
@@ -69,12 +71,23 @@ class DynamoDbIndexer(Indexer):
         )
 
     def get_all_video_ids_as_set(self):
-        response = self.table.scan()
-        if 'Items' in response:
-            items = response['Items']
-            return set(map(lambda x: x[k_VIDEO_ID], items))
-        else:
-            return set()
+        to_return = set()
+        metadata = {'LastEvaluatedKey': None}
+        while True:
+            try:
+                if metadata['LastEvaluatedKey']:
+                    response = self.table.scan(ExclusiveStartKey=metadata['LastEvaluatedKey'])
+                else:
+                    response = self.table.scan()
+                if response['Count'] > 0:
+                    to_return |= set(map(lambda x: x[k_VIDEO_ID], response['Items']))
+                    metadata = {'LastEvaluatedKey': response['LastEvaluatedKey']}
+                else:
+                    break
+            except botocore.errorfactory.ProvisionedThroughputExceededException:
+                time.sleep(15)
+
+        return to_return
 
 
 class SimpleUTC(tzinfo):
