@@ -15,7 +15,7 @@ k_REQUEST_FOLDER = 'requests'
 
 class App(metaclass=ABCMeta):
     def __init__(self):
-        self.queue = CyclicQueue(indexer=_get_indexer(), logger=log)
+        self.queue = CyclicQueue(indexer=_get_indexer(), logger=logger)
         self.storage = _get_storage()
         self.threads = self.create_thread_pool()
 
