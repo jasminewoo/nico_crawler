@@ -80,10 +80,10 @@ class DynamoDbIndexer(Indexer):
                     response = self.table.scan()
 
                 to_return |= set(map(lambda x: x[k_VIDEO_ID], response['Items']))
-                log.info('get_all_video_ids_as_set len(set)={}'.format(len(to_return)))
+                log.info('len(set)={}'.format(len(to_return)))
 
                 if response['Count'] == 0 or k_LAST_EVALUATED_KEY not in response:
-                    log.info('get_all_video_ids_as_set No more rows')
+                    log.info('All items downloaded')
                     break
 
                 metadata[k_LAST_EVALUATED_KEY] = response[k_LAST_EVALUATED_KEY]

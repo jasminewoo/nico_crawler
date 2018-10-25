@@ -40,7 +40,7 @@ class DownloadThread(Thread):
     def run_single_iteration(self):
         video = self.queue.peek_and_reserve()
         if video:
-            self.logger.info('Start          {}'.format(video))
+            self.logger.debug('Start          {}'.format(video))
             try:
                 vt = video.video_type
                 if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
@@ -52,7 +52,7 @@ class DownloadThread(Thread):
                 else:
                     self.enqueue_related_videos(video=video)
                     self.queue.mark_as_referenced(video)
-                    self.logger.info('Referenced:    {}'.format(video))
+                    self.logger.debug('Referenced:    {}'.format(video))
             except RetriableError:
                 self.queue.enqueue_again(video)
                 self.logger.info('Pending retry: {}'.format(video))
@@ -85,7 +85,7 @@ class DownloadThread(Thread):
     def enqueue_related_videos(self, video):
         if not self.is_crawl:
             return
-        self.logger.info('Crawling:      {}'.format(video))
+        self.logger.debug('Crawling:      {}'.format(video))
         self.logger.debug('{}.video_type={}'.format(video, video.video_type))
         for url in video.related_urls:
             self.logger.debug('Processing url={}'.format(url))
@@ -94,7 +94,7 @@ class DownloadThread(Thread):
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             results = self.queue.enqueue(related_videos)
             self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))
-        self.logger.info('Crawl Done:    {}'.format(video))
+        self.logger.debug('Crawl Done:    {}'.format(video))
 
 
 class RetriableError(Exception):

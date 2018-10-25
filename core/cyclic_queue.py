@@ -33,7 +33,7 @@ class CyclicQueue:
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
             return
 
-        default_logger.debug('pull_from_indexer len(queue)={}'.format(len(self._list)))
+        default_logger.debug('len(queue)={}'.format(len(self._list)))
 
         pending = self.indexer.get_video_ids_by_status(Indexer.k_STATUS_PENDING,
                                                        max_result_set_size=k_MAX_QUEUE_SIZE // 2)
@@ -45,7 +45,7 @@ class CyclicQueue:
 
     def _append_all(self, video_ids, requires_creds=False):
         default_logger.debug(
-            '_append_all len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
+            'len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
         self._lock.acquire()
         existing_video_ids = {}
         for qe in self._list:
