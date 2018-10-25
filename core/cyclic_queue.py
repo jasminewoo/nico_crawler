@@ -23,8 +23,8 @@ class CyclicQueue:
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        self.cached_indexer = set()
         self.default_logger = logger
+        self.cached_indexer = indexer.get_all_video_ids_as_set()
         self.replenish_timer = RepeatedTimer(30, self.pull_from_indexer)
 
     def pull_from_indexer(self):
