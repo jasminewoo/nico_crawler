@@ -14,7 +14,7 @@ def get_file_log_handler(name='default'):
     if not os.path.exists(k_LOGS_FOLDER):
         os.mkdir(k_LOGS_FOLDER)
     handler = logging.FileHandler('{}/{}.log'.format(k_LOGS_FOLDER, name))
-    fh_fmt = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(threadName)s %(message)s")
+    fh_fmt = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(threadName)s %(funcName)20s %(message)s")
     fh_fmt.datefmt = '%Y-%m-%d %H:%M:%S'
     handler.setFormatter(fh_fmt)
     handler.setLevel(logging.DEBUG)
