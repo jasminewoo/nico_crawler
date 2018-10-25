@@ -43,8 +43,8 @@ class DynamoDbIndexer(Indexer):
 
     def _get_items_by_status(self, status, max_result_set_size=None):
         if max_result_set_size > k_SEARCH_LIMIT:
-            AssertionError(
-                '_get_items_by_status assertion: {} <= {} failed'.format(max_result_set_size, k_SEARCH_LIMIT))
+            msg = '_get_items_by_status assertion: {} <= {} failed'.format(max_result_set_size, k_SEARCH_LIMIT)
+            raise AssertionError(msg)
 
         response = self.table.query(
             IndexName='video_status-index',
