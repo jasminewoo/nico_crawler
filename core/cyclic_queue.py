@@ -53,7 +53,7 @@ class CyclicQueue:
         for new_video_id in video_ids:
             if new_video_id not in existing_video_ids:
                 video = Video(video_id=new_video_id)
-                video.requires_creds = requires_creds
+                video.requires_creds_to_download = requires_creds
                 qe = QueueElement(video=video)
                 self._list.append(qe)
         self._lock.release()

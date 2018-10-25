@@ -13,7 +13,7 @@ k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 class CustomYoutubeDL(YoutubeDL):
     def __init__(self, video, logger=None):
-        YoutubeDL.__init__(self, params=get_ydl_options(video.requires_creds))
+        YoutubeDL.__init__(self, params=get_ydl_options(requires_creds=video.requires_creds_to_download, logger=logger))
         self.video = video
         self.log = logger
 

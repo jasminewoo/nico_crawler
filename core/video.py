@@ -16,7 +16,7 @@ class Video:
         if video_id:
             self.video_id = video_id
         self._html = None
-        self.requires_creds = False
+        self.requires_creds_to_download = False
         self._mylist_count = mylist_count
 
     @property
