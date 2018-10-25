@@ -1,10 +1,13 @@
 import unittest
 
+from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.html_handler.video_html_parser import VideoHTMLParser
 
 k_UTATTEMITA_WITH_JSON = 'video2.html'
 k_UTATTEMITA_WITHOUT_JSON = 'video3_without_json.html'
 k_LOGIN_PAGE = 'video_requiring_login.html'
+k_MAINT_JA = 'maint_japanese.html'
+k_MAINT_EN = 'maint_english.html'
 
 
 class VideoParserTest(unittest.TestCase):
@@ -58,10 +61,20 @@ class VideoParserTest(unittest.TestCase):
         contains = 'https://www.nicovideo.jp/mylist/30043188' in p.description
         self.assertTrue(contains, "'https://www.nicovideo.jp/mylist/30043188' should be in the description")
 
+    def test_maint_japanese_exception(self):
+        self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_MAINT_JA)
 
-def get_parser(filename):
+    def test_maint_english_exception(self):
+        self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_MAINT_EN)
+
+    def test_maint_exception_by_status_code(self):
+        # Regular page but with http code 503
+        self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_UTATTEMITA_WITH_JSON, 503)
+
+
+def get_parser(filename, status_code=0):
     html_string = get_html_string(filename)
-    return VideoHTMLParser(html_string=html_string)
+    return VideoHTMLParser(html_string=html_string, status_code=status_code)
 
 
 def get_html_string(filename):
