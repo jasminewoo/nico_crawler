@@ -44,7 +44,7 @@ class Video:
     def video_type(self):
         tags = self.html.tags
         if not tags:
-            raise ValueError('{} has no tags'.format(self))
+            raise ValueError('{} has no tags; {}'.format(self, self.html.html_string))
 
         if '歌ってみた' in tags:
             return self.k_VIDEO_TYPE_UTATTEMITA
