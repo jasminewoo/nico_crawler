@@ -13,7 +13,9 @@ k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 class CustomYoutubeDL(YoutubeDL):
     def __init__(self, video, logger=None):
-        YoutubeDL.__init__(self, params=get_ydl_options(requires_creds=video.requires_creds_to_download, logger=logger))
+        creds = video.requires_creds_to_download
+        params = get_ydl_options(title=video.title, requires_creds=creds, logger=logger)
+        YoutubeDL.__init__(self, params=params)
         self.video = video
 
     def download(self):
@@ -40,10 +42,11 @@ class CustomYoutubeDL(YoutubeDL):
             os.remove(path)
 
 
-def get_ydl_options(requires_creds=False, logger=None):
+def get_ydl_options(title=None, requires_creds=False, logger=None):
+    title_format = title if title else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': '{}/%(upload_date)s-%(title)s-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH),
+        'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title_format),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],

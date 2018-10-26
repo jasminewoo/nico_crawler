@@ -80,7 +80,10 @@ class DownloadThread(Thread):
             if ydl.download() != 0:
                 raise RuntimeError('Download failed')
             if self.storage:
-                self.storage.upload_file(ydl.filename, ydl.path)
+                filename = ydl.filename
+                if video.title:
+                    filename = filename.replace('REPLACE_TITLE', video.title)
+                self.storage.upload_file(filename, ydl.path)
         except (URLError, ExtractorError, DownloadError) as e:
             if 'Niconico videos now require logging in' in str(e):
                 raise LogInError
