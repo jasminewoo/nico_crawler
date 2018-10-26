@@ -44,9 +44,9 @@ class Video:
 
     @property
     def video_type(self):
-        if '歌ってみた' in self.html.tags:
+        if '歌ってみた' in self.html.tags or 'Sang_it' in self.html.tags:
             return self.k_VIDEO_TYPE_UTATTEMITA
-        elif 'VOCALIOD' in self.html.tags or 'Vocaloid' in self.html.tags or 'vocaloid' in self.html.tags:
+        elif 'Vocaloid' in self.html.tags:
             return self.k_VIDEO_TYPE_VOCALOID_ORG
         else:
             return self.k_VIDEO_TYPE_UNKNOWN
