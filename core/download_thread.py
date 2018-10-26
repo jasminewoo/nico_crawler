@@ -4,12 +4,9 @@ import logging
 import threading
 import time
 from threading import Thread
-from urllib.error import URLError
 
-from youtube_dl.utils import ExtractorError, DownloadError
-
-from core import global_config, logging_utils
-from core.custom_youtube_dl import CustomYoutubeDL
+from core import global_config, logging_utils, custom_youtube_dl
+from core.custom_youtube_dl import RetriableError, LogInError
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.nico_object_factory import NicoObjectFactory
 from core.video import Video
@@ -46,7 +43,7 @@ class DownloadThread(Thread):
                 vt = video.video_type
                 if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
                     self.logger.info('Downloading:   {}'.format(video))
-                    self.download(video=video)
+                    custom_youtube_dl.download(video=video, logger=self.logger, storage=self.storage)
                     self.queue.mark_as_done(video)
                     self.logger.info('Finished:      {}'.format(video))
                     self.enqueue_related_videos(video=video)
@@ -74,26 +71,6 @@ class DownloadThread(Thread):
             time.sleep(1)
         return True
 
-    def download(self, video):
-        ydl = CustomYoutubeDL(video, logger=self.logger)
-        try:
-            if ydl.download() != 0:
-                raise RuntimeError('Download failed')
-            if self.storage:
-                filename = ydl.filename
-                if video.title:
-                    filename = filename.replace('REPLACE_TITLE', video.title)
-                self.storage.upload_file(filename, ydl.path)
-        except (URLError, ExtractorError, DownloadError, MemoryError) as e:
-            if 'Niconico videos now require logging in' in str(e):
-                raise LogInError
-            else:
-                self.logger.debug(e)
-                raise RetriableError
-        finally:
-            if self.storage:
-                ydl.remove_local_file()
-
     def enqueue_related_videos(self, video):
         if not self.is_crawl:
             return
@@ -107,11 +84,3 @@ class DownloadThread(Thread):
             results = self.queue.enqueue(related_videos)
             self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))
         self.logger.debug('Crawl Done:    {}'.format(video))
-
-
-class RetriableError(Exception):
-    pass
-
-
-class LogInError(Exception):
-    pass

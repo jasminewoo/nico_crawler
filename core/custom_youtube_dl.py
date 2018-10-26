@@ -1,7 +1,9 @@
 import logging
 import os
+from urllib.error import URLError
 
 from youtube_dl import YoutubeDL
+from youtube_dl.utils import ExtractorError, DownloadError
 
 from core import global_config
 
@@ -43,6 +45,24 @@ class CustomYoutubeDL(YoutubeDL):
             os.remove(path)
 
 
+def download(video, logger, storage):
+    ydl = CustomYoutubeDL(video, logger)
+    try:
+        if ydl.download() != 0:
+            raise RuntimeError('Download failed')
+        if storage:
+            storage.upload_file(ydl.filename, ydl.path)
+    except (URLError, ExtractorError, DownloadError, MemoryError) as e:
+        if 'Niconico videos now require logging in' in str(e):
+            raise LogInError
+        else:
+            logger.debug(e)
+            raise RetriableError
+    finally:
+        if storage:
+            ydl.remove_local_file()
+
+
 def get_ydl_options(title=None, requires_creds=False, logger=None):
     title_format = title if title else '%(title)s'
     options = {
@@ -77,3 +97,11 @@ class SilentLogger:
 
     def error(self, msg):
         self.log.debug(msg)
+
+
+class RetriableError(Exception):
+    pass
+
+
+class LogInError(Exception):
+    pass
