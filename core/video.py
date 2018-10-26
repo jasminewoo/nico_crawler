@@ -42,13 +42,9 @@ class Video:
 
     @property
     def video_type(self):
-        tags = self.html.tags
-        if tags is None:
-            raise ValueError('{} has no tags; {}'.format(self, self.html.html_string))
-
-        if '歌ってみた' in tags:
+        if '歌ってみた' in self.html.tags:
             return self.k_VIDEO_TYPE_UTATTEMITA
-        elif 'VOCALIOD' in tags or 'Vocaloid' in tags or 'vocaloid' in tags:
+        elif 'VOCALIOD' in self.html.tags or 'Vocaloid' in self.html.tags or 'vocaloid' in self.html.tags:
             return self.k_VIDEO_TYPE_VOCALOID_ORG
         else:
             return self.k_VIDEO_TYPE_UNKNOWN
