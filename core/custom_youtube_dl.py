@@ -87,16 +87,16 @@ def get_ydl_options(title=None, requires_creds=False, logger=None):
 
 class SilentLogger:
     def __init__(self, logger):
-        self.log = logger
+        self.logger = logger
 
     def debug(self, msg):
-        self.log.debug(msg)
+        self.logger.debug(msg)
 
     def warning(self, msg):
-        self.log.debug(msg)
+        self.logger.debug(msg)
 
     def error(self, msg):
-        self.log.debug(msg)
+        self.logger.debug(msg)
 
 
 class RetriableError(Exception):
