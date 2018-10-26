@@ -61,6 +61,13 @@ def download(video, logger, storage):
             ydl.remove_local_file()
 
 
+def sanitize_title(video_title):
+    video_title = video_title.replace('/', ' ')
+    while '  ' in video_title:
+        video_title = video_title.replace('  ', ' ')
+    return video_title
+
+
 def get_ydl_options(title=None, requires_creds=False, logger=None):
     title_format = title if title else '%(title)s'
     options = {
