@@ -2,6 +2,7 @@ import unittest
 
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.html_handler.video_html_parser import VideoHTMLParser
+from tests import resource_getter
 
 k_UTATTEMITA_WITH_JSON = 'video2.html'
 k_UTATTEMITA_WITHOUT_JSON = 'video3_without_json.html'
@@ -115,15 +116,10 @@ class VideoParserTest(unittest.TestCase):
 
 
 def get_parser(filename, status_code=0):
-    html_string = get_html_string(filename)
+    fp = resource_getter.get_resource_fp(filename)
+    html_string = fp.read()
+    fp.close()
     return VideoHTMLParser(html_string=html_string, status_code=status_code)
-
-
-def get_html_string(filename):
-    # TODO: generalize this method so the resources can be accessed from anywhere
-    with open('resources/' + filename, 'r') as fp:
-        html_string = fp.read()
-    return html_string
 
 
 if __name__ == '__main__':
