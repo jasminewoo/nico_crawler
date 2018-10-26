@@ -41,11 +41,10 @@ class CyclicQueue:
                                                             max_result_set_size=k_MAX_QUEUE_SIZE // 10)
 
         self._append_all(pending)
-        self._append_all(login_failed, requires_creds=True)
+        self._append_all(login_failed)
 
-    def _append_all(self, video_ids, requires_creds=False):
-        default_logger.debug(
-            'len(video_ids)={} requires_creds={}'.format(len(video_ids), str(requires_creds)))
+    def _append_all(self, video_ids):
+        default_logger.debug('len(video_ids)={}'.format(len(video_ids)))
         self._lock.acquire()
         existing_video_ids = {}
         for qe in self._list:
@@ -53,7 +52,6 @@ class CyclicQueue:
         for new_video_id in video_ids:
             if new_video_id not in existing_video_ids:
                 video = Video(video_id=new_video_id)
-                video.requires_creds_to_download = requires_creds
                 qe = QueueElement(video=video)
                 self._list.append(qe)
         self._lock.release()
