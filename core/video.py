@@ -43,7 +43,7 @@ class Video:
     @property
     def video_type(self):
         tags = self.html.tags
-        if not tags:
+        if tags is None:
             raise ValueError('{} has no tags; {}'.format(self, self.html.html_string))
 
         if '歌ってみた' in tags:
