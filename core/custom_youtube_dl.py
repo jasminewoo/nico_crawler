@@ -75,7 +75,7 @@ def get_ydl_options(title=None, requires_creds=False, logger=None):
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title_format),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': global_config.instance['convert_to'],
+            'preferredcodec': global_config.instance['convert_to'] if 'convert_to' in global_config.instance else 'm4a',
             'preferredquality': '320',
         }],
         'noprogress': True
