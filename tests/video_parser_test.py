@@ -8,6 +8,7 @@ k_UTATTEMITA_WITHOUT_JSON = 'video3_without_json.html'
 k_LOGIN_PAGE = 'video_requiring_login.html'
 k_MAINT_JA = 'maint_japanese.html'
 k_MAINT_EN = 'maint_english.html'
+k_DELETED = 'video_deleted.html'
 
 
 class VideoParserTest(unittest.TestCase):
@@ -70,6 +71,13 @@ class VideoParserTest(unittest.TestCase):
     def test_maint_exception_by_status_code(self):
         # Regular page but with http code 503
         self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_UTATTEMITA_WITH_JSON, 503)
+
+    def test_deleted_video_identified_as_unavailable(self):
+        p = get_parser(k_DELETED)
+        self.assertFalse(p.is_available, 'The video should not be marked as available')
+        self.assertEqual([], p.tags, 'The video should return empty list for tags')
+        self.assertEqual('', p.description, 'The video should return an empty description')
+        self.assertEqual(0, p.mylist_count, 'The video should return 0 mylist count')
 
 
 def get_parser(filename, status_code=0):
