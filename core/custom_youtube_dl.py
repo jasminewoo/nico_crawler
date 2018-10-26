@@ -23,10 +23,11 @@ class CustomYoutubeDL(YoutubeDL):
 
     @property
     def filename(self):
-        files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
-        filtered_list = list(filter(lambda f: self.video.video_id in f, files))
-        if filtered_list and len(filtered_list) == 1:
-            return filtered_list[0]
+        if os.path.exists(k_DOWNLOADS_FOLDER_PATH):
+            files = os.listdir(k_DOWNLOADS_FOLDER_PATH)
+            filtered_list = list(filter(lambda f: self.video.video_id in f, files))
+            if filtered_list and len(filtered_list) == 1:
+                return filtered_list[0]
         return None
 
     @property
