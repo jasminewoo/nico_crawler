@@ -1,7 +1,6 @@
 import logging
 from abc import abstractmethod
 from html.parser import HTMLParser
-from html import unescape
 
 import requests
 
@@ -22,19 +21,16 @@ class NicoHTMLParser(HTMLParser):
         else:
             raise AssertionError('No info provided')
 
-        self.check_for_maint()
+        if self.status_code == 503:
+            raise ServiceUnderMaintenanceError
 
         self.html_vars = self.create_html_vars()
         self.feed(self.html_string)
+        self.close()
 
         for html_var in self.html_vars.values():
-            if html_var.data:
+            if html_var.data is not None:
                 html_var.postprocess()
-
-    def check_for_maint(self):
-        unescaped = unescape(self.html_string)
-        if self.status_code == 503 or 'ただいまメンテナンス中です' in unescaped or 'Currently under maintenance' in unescaped:
-            raise ServiceUnderMaintenanceError
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -63,8 +59,4 @@ class NicoHTMLParser(HTMLParser):
 
 
 class ServiceUnderMaintenanceError(Exception):
-    pass
-
-
-def make_get_call(url):
     pass

@@ -10,12 +10,15 @@ class HTMLVariable:
         self.tag_conditions = tag_conditions
         self.tag_condition_satisfaction = [False] * len(tag_conditions)
         self.end_tag = determine_end_tag(tag_conditions)
+        self.depth = 0
 
     def process_start_tag(self, tag, attrs):
         if self.data:
             return
 
         if self.is_detected:
+            if tag == self.end_tag:
+                self.depth += 1
             self.process_data(to_string(tag, attrs))
             return
 
@@ -40,9 +43,13 @@ class HTMLVariable:
             return
 
         if tag == self.end_tag:
-            self.data = self._data_buffer
-        else:
-            self.process_data(to_string(tag))
+            if self.depth == 0:
+                self.data = self._data_buffer
+                return
+            else:
+                self.depth -= 1
+
+        self.process_data(to_string(tag))
 
     def process_data(self, data):
         if not self.data and self.is_detected and not self.data_key:
