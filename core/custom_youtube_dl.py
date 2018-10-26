@@ -62,7 +62,9 @@ def download(video, logger, storage):
 
 
 def sanitize_title(video_title):
-    video_title = video_title.replace('/', ' ')
+    for key, value in global_config.instance['title_sanitization'].items():
+        if key in video_title:
+            video_title = video_title.replace(key, value)
     while '  ' in video_title:
         video_title = video_title.replace('  ', ' ')
     return video_title
