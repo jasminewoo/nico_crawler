@@ -9,7 +9,8 @@ class CustomYoutubeDLTest(unittest.TestCase):
         kvps = {
             'メトロノーム 歌ってみた / pazi': 'メトロノーム 歌ってみた pazi',
             '【覚えて歌お！】カラオケで歌えるボーカロイド曲集09_4月号B': '[覚えて歌お!]カラオケで歌えるボーカロイド曲集09_4月号B',
-            '【2人で】ン（Ver）【初心者Fとmorlbon】':'[2人で]ン(Ver)[初心者Fとmorlbon]'
+            '【2人で】ン（Ver）【初心者Fとmorlbon】': '[2人で]ン(Ver)[初心者Fとmorlbon]',
+            '２５２５': '2525'
         }
         for org_title, expected in kvps.items():
             with self.subTest(org_title):

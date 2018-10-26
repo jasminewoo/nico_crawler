@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+import unicodedata
 from urllib.error import URLError
 
 from youtube_dl import YoutubeDL
@@ -62,6 +63,7 @@ def download(video, logger, storage):
 
 
 def sanitize_title(video_title):
+    video_title = unicodedata.normalize('NFKC', video_title)
     for key, value in global_config.instance['title_sanitization'].items():
         if key in video_title:
             video_title = video_title.replace(key, value)
