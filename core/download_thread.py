@@ -84,14 +84,15 @@ class DownloadThread(Thread):
                 if video.title:
                     filename = filename.replace('REPLACE_TITLE', video.title)
                 self.storage.upload_file(filename, ydl.path)
-        except (URLError, ExtractorError, DownloadError) as e:
+        except (URLError, ExtractorError, DownloadError, MemoryError) as e:
             if 'Niconico videos now require logging in' in str(e):
                 raise LogInError
             else:
                 self.logger.debug(e)
                 raise RetriableError
-        if self.storage:
-            ydl.remove_local_file()
+        finally:
+            if self.storage:
+                ydl.remove_local_file()
 
     def enqueue_related_videos(self, video):
         if not self.is_crawl:
