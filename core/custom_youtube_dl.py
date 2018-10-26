@@ -62,8 +62,8 @@ def get_ydl_options(requires_creds=False, logger=None):
     return options
 
 
-class SilentLogger(object):
-    def __index__(self, logger):
+class SilentLogger:
+    def __init__(self, logger):
         self.log = logger
 
     def debug(self, msg):
