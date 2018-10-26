@@ -15,8 +15,8 @@ k_REQUEST_FOLDER = 'requests'
 
 class App(metaclass=ABCMeta):
     def __init__(self):
-        self.queue = CyclicQueue(indexer=_get_indexer())
-        self.storage = _get_storage()
+        self.queue = CyclicQueue(indexer=self.create_indexer())
+        self.storage = self.get_storage()
         self.threads = self.create_thread_pool()
 
     def create_thread_pool(self):
@@ -25,8 +25,21 @@ class App(metaclass=ABCMeta):
             threads.append(self.create_thread())
         return threads
 
+    def get_storage(self):
+        if 'google_drive_folder_id' in global_config.instance:
+            storage = GoogleDrive(config=global_config.instance)
+            logger.info('Initialized storage object with config')
+            return storage
+        storage = GoogleDrive()
+        logger.info('Initialized storage object with default settings')
+        return storage
+
     @abstractmethod
     def create_thread(self):
+        pass
+
+    @abstractmethod
+    def create_indexer(self):
         pass
 
 
@@ -50,6 +63,9 @@ class AppSingleMode(App):
             thread.join()
         self.queue.replenish_timer.stop()
 
+    def create_indexer(self):
+        return None
+
 
 class AppDaemonMode(App):
     def __init__(self):
@@ -67,20 +83,9 @@ class AppDaemonMode(App):
         vids = NicoObjectFactory(url=url, logger=logger).get_videos(min_mylist=global_config.instance['minimum_mylist'])
         self.queue.enqueue(vids)
 
-
-def _get_storage():
-    if 'google_drive_folder_id' in global_config.instance:
-        storage = GoogleDrive(config=global_config.instance)
-        logger.info('Initialized storage object with config')
-        return storage
-    storage = GoogleDrive()
-    logger.info('Initialized storage object with default settings')
-    return storage
-
-
-def _get_indexer():
-    aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
-    for field in aws_required_fields:
-        if field not in global_config.instance:
-            raise AssertionError('AWS credentials must be provided')
-    return DynamoDbIndexer(config=global_config.instance)
+    def create_indexer(self):
+        aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
+        for field in aws_required_fields:
+            if field not in global_config.instance:
+                raise AssertionError('AWS credentials must be provided')
+        return DynamoDbIndexer(config=global_config.instance)
