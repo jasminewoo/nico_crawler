@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 from urllib.error import URLError
@@ -66,6 +67,14 @@ def sanitize_title(video_title):
     while '  ' in video_title:
         video_title = video_title.replace('  ', ' ')
     return video_title
+
+
+def encode_title(video_title):
+    return base64.urlsafe_b64encode(str.encode(video_title)).decode()
+
+
+def decode_title(b64str):
+    return base64.urlsafe_b64decode(b64str.encode()).decode()
 
 
 def get_ydl_options(title=None, requires_creds=False, logger=None):
