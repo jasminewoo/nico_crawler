@@ -13,6 +13,7 @@ k_ZERO_TAGS_WITHOUT_JSON = 'video_no_tags_no_json.html'
 k_ZERO_TAGS_WITH_JSON = 'video_no_tags.html'
 k_PRIVATE_JA = 'video_private_ja.html'
 k_PRIVATE_EN = 'video_private_en.html'
+k_BLANK = 'video_blank.html'
 
 
 class VideoParserTest(unittest.TestCase):
@@ -92,6 +93,10 @@ class VideoParserTest(unittest.TestCase):
         for filename in [k_PRIVATE_EN, k_PRIVATE_JA]:
             p = get_parser(filename)
             self.assertFalse(p.is_available, '{}: Video should not be identified as available'.format(filename))
+
+    def test_blank_video(self):
+        get_parser(k_BLANK)
+        # If the parser initializes without any error, then good.
 
 
 def get_parser(filename, status_code=0):
