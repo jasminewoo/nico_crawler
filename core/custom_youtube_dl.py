@@ -94,7 +94,9 @@ def get_ydl_options(title=None, logger=None):
     }
 
     if logger:
-        options['logger'] = SilentLogger(logger=logger)
+        cl = logger if type(logger) is CustomLogger else CustomLogger(logger=logger)
+        options['logger'] = cl
+        options['progress_hooks']: [cl.hook]
 
     if 'nico_username' in global_config.instance and 'nico_password' in global_config.instance:
         options['username'] = global_config.instance['nico_username']
@@ -103,18 +105,29 @@ def get_ydl_options(title=None, logger=None):
     return options
 
 
-class SilentLogger:
+class CustomLogger:
     def __init__(self, logger):
         self.logger = logger
+        self.history = []
 
     def debug(self, msg):
-        self.logger.debug(msg)
+        self.log_with_history(self.logger.debug, msg)
 
     def warning(self, msg):
-        self.logger.debug(msg)
+        self.log_with_history(self.logger.debug, msg)
 
     def error(self, msg):
-        self.logger.debug(msg)
+        self.log_with_history(self.logger.debug, msg)
+
+    def hook(self, d):
+        if d['status'] == 'finished':
+            self.log_with_history(self.logger.debug, 'Done downloading, now converting ...')
+        else:
+            self.log_with_history(self.logger.debug, str(d))
+
+    def log_with_history(self, func, msg):
+        self.history.append(msg)
+        func(msg)
 
 
 class RetriableError(Exception):
