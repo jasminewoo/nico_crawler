@@ -15,7 +15,6 @@ class CustomYoutubeDL(YoutubeDL):
     def __init__(self, video, logger=None):
         YoutubeDL.__init__(self, params=get_ydl_options(requires_creds=video.requires_creds_to_download, logger=logger))
         self.video = video
-        self.log = logger
 
     def download(self):
         return YoutubeDL.download(self, [self.video.url])

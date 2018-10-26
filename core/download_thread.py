@@ -78,7 +78,7 @@ class DownloadThread(Thread):
         ydl = CustomYoutubeDL(video, logger=self.logger)
         try:
             if ydl.download() != 0:
-                raise RuntimeError
+                raise RuntimeError('Download failed')
             if self.storage:
                 self.storage.upload_file(ydl.filename, ydl.path)
         except (URLError, ExtractorError, DownloadError) as e:

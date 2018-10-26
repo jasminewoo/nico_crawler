@@ -26,9 +26,7 @@ class Video:
         if vt == self.k_VIDEO_TYPE_UTATTEMITA:
             matches = re.findall(url_regex_str, self.html.description)
             for url in matches:
-                if 'nicovideo' not in url:
-                    continue
-                if '/watch/' in url or '/mylist/' in url:
+                if 'nicovideo' in url and ('/watch/' in url or '/mylist/' in url):
                     urls.append(url)
         elif vt == self.k_VIDEO_TYPE_VOCALOID_ORG:
             search_template = 'https://www.nicovideo.jp/search/{}%20%E6%AD%8C%E3%81%A3%E3%81%A6%E3%81%BF%E3%81%9F'
