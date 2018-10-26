@@ -40,9 +40,7 @@ class CustomYoutubeDL(YoutubeDL):
             return None
 
     def remove_local_file(self):
-        path = self.path
-        if path:
-            os.remove(path)
+        os.remove(self.path)
 
 
 def download(video, logger, storage):
@@ -59,7 +57,7 @@ def download(video, logger, storage):
             logger.debug(e)
             raise RetriableError
     finally:
-        if storage:
+        if storage and ydl.path:
             ydl.remove_local_file()
 
 
