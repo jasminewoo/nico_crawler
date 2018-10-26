@@ -79,7 +79,7 @@ class GoogleDrive(StorageService):
 
     def _upload_inner(self, is_new_entity=True, key=None, name=None, path=None, data=None):
         if (1 if path else 0) + (1 if data else 0) != 1:
-            raise AssertionError("Provide one of 'path' and 'body'")
+            raise AssertionError("Provide one of 'path' and 'data'")
 
         if not is_new_entity and not key:
             raise AssertionError('fileId (aka. key) must be provided when updating an existing entity')
