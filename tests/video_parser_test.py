@@ -9,6 +9,9 @@ k_LOGIN_PAGE = 'video_requiring_login.html'
 k_MAINT_JA = 'maint_japanese.html'
 k_MAINT_EN = 'maint_english.html'
 k_DELETED = 'video_deleted.html'
+k_ZERO_TAGS = 'video_no_tags.html'
+k_PRIVATE_JA = 'video_private_ja.html'
+k_PRIVATE_EN = 'video_private_en.html'
 
 
 class VideoParserTest(unittest.TestCase):
@@ -27,6 +30,8 @@ class VideoParserTest(unittest.TestCase):
     def test_login_redirect_is_available(self):
         p = get_parser(k_LOGIN_PAGE)
         self.assertFalse(p.is_available, 'The video should not be identified as available')
+        self.assertEqual([], p.tags)
+        self.assertEqual('', p.description)
 
     def test_mylist_with_json(self):
         p = get_parser(k_UTATTEMITA_WITH_JSON)
@@ -62,11 +67,9 @@ class VideoParserTest(unittest.TestCase):
         contains = 'https://www.nicovideo.jp/mylist/30043188' in p.description
         self.assertTrue(contains, "'https://www.nicovideo.jp/mylist/30043188' should be in the description")
 
-    def test_maint_japanese_exception(self):
-        self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_MAINT_JA)
-
-    def test_maint_english_exception(self):
-        self.assertRaises(ServiceUnderMaintenanceError, get_parser, k_MAINT_EN)
+    def test_maint_exception(self):
+        for filename in [k_MAINT_JA, k_MAINT_EN]:
+            self.assertRaises(ServiceUnderMaintenanceError, get_parser, filename)
 
     def test_maint_exception_by_status_code(self):
         # Regular page but with http code 503
@@ -78,6 +81,15 @@ class VideoParserTest(unittest.TestCase):
         self.assertEqual([], p.tags, 'The video should return empty list for tags')
         self.assertEqual('', p.description, 'The video should return an empty description')
         self.assertEqual(0, p.mylist_count, 'The video should return 0 mylist count')
+
+    def test_videos_with_zero_tags(self):
+        p = get_parser(k_ZERO_TAGS)
+        self.assertEqual([], p.tags, 'tags should be an empty list')
+
+    def test_private_identified_as_unavailable(self):
+        for filename in [k_PRIVATE_EN, k_PRIVATE_JA]:
+            p = get_parser(filename)
+            self.assertFalse(p.is_available, '{}: Video should not be identified as available'.format(filename))
 
 
 def get_parser(filename, status_code=0):
