@@ -2,7 +2,7 @@ import unittest
 
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.html_handler.video_html_parser import VideoHTMLParser
-from tests.CustomTestCase import CustomTestCase
+from tests.custom_test_case import CustomTestCase
 
 k_UTATTEMITA_WITH_JSON = 'video2.html'
 k_UTATTEMITA_WITHOUT_JSON = 'video3_without_json.html'
