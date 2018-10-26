@@ -65,22 +65,27 @@ class Message(HTMLVariableCollection):
     def __init__(self):
         HTMLVariableCollection.__init__(self, [
             HTMLVariable(tag_conditions=[{'div.id': 'PAGEBODY'}]),
-            HTMLVariable(tag_conditions=[{'p.class': 'messageTitle'}])
+            HTMLVariable(tag_conditions=[{'div.class': 'messageBox'}])
         ])
 
     def postprocess(self):
         unescaped = unescape(self.data)
-        if 'Currently under maintenance' in unescaped or 'ただいまメンテナンス中です' in unescaped:
+        if 'Currently under maintenance' in unescaped or \
+                'ただいまメンテナンス中です' in unescaped or \
+                'maintenance-image' in unescaped:
             raise ServiceUnderMaintenanceError
 
     @property
     def is_private_or_deleted(self):
         if self.data:
             unescaped = unescape(self.data)
-            return 'Unable to play video' in unescaped or \
+            return 'ch.nicovideo.jp/channel' in unescaped or \
+                   'Unable to play video' in unescaped or \
                    'This video does not exist, or has been deleted' in unescaped or \
                    'ページが見つかりませんでした' in unescaped or \
-                   'お探しの動画は再生できません' in unescaped
+                   'お探しの動画は再生できません' in unescaped or \
+                   '動画が投稿されている公開コミュニティ一覧' in unescaped or \
+                   '権限がないため、視聴できません。' in unescaped
         return False
 
 

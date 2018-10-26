@@ -14,6 +14,8 @@ k_ZERO_TAGS_WITH_JSON = 'video_no_tags.html'
 k_PRIVATE_JA = 'video_private_ja.html'
 k_PRIVATE_EN = 'video_private_en.html'
 k_BLANK = 'video_blank.html'
+k_CHANNEL_ONLY = 'video_channel_members_only.html'
+k_NOT_AUTHORIZED = 'video_not_authorized.html'
 
 
 class VideoParserTest(unittest.TestCase):
@@ -97,6 +99,19 @@ class VideoParserTest(unittest.TestCase):
     def test_blank_video(self):
         get_parser(k_BLANK)
         # If the parser initializes without any error, then good.
+
+    def test_channel_members_only_identified_as_unavailable(self):
+        p = get_parser(k_CHANNEL_ONLY)
+        self.assertFalse(p.is_available, 'Video should not be identified as available')
+
+    def test_not_authorized_by_message(self):
+        p = get_parser(k_NOT_AUTHORIZED)
+        self.assertFalse(p.is_available, 'Video should not be identified as available')
+
+    def test_not_authorized_by_status_code(self):
+        for code in [403, 404]:
+            p = get_parser(k_UTATTEMITA_WITH_JSON, status_code=code)
+            self.assertFalse(p.is_available, 'Video should not be identified as available')
 
 
 def get_parser(filename, status_code=0):
