@@ -72,7 +72,8 @@ def get_ydl_options(title=None, requires_creds=False, logger=None):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'],
             'preferredquality': '320',
-        }]
+        }],
+        'noprogress': True
     }
 
     if logger:
