@@ -35,7 +35,7 @@ class DownloadThread(Thread):
             try:
                 keep_running = self.run_single_iteration()
             except Exception as e:
-                self.logger.error(e)
+                self.logger.exception(e)
                 keep_running = False
 
     def run_single_iteration(self):
