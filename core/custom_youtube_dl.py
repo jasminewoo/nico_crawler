@@ -120,10 +120,7 @@ class CustomLogger:
         self.log_with_history(self.logger.debug, msg)
 
     def hook(self, d):
-        if d['status'] == 'finished':
-            self.log_with_history(self.logger.debug, 'Done downloading, now converting ...')
-        else:
-            self.log_with_history(self.logger.debug, str(d))
+        pass
 
     def log_with_history(self, func, msg):
         self.history.append(msg)
