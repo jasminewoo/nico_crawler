@@ -9,7 +9,8 @@ k_LOGIN_PAGE = 'video_requiring_login.html'
 k_MAINT_JA = 'maint_japanese.html'
 k_MAINT_EN = 'maint_english.html'
 k_DELETED = 'video_deleted.html'
-k_ZERO_TAGS = 'video_no_tags.html'
+k_ZERO_TAGS_WITHOUT_JSON = 'video_no_tags_no_json.html'
+k_ZERO_TAGS_WITH_JSON = 'video_no_tags.html'
 k_PRIVATE_JA = 'video_private_ja.html'
 k_PRIVATE_EN = 'video_private_en.html'
 
@@ -83,8 +84,9 @@ class VideoParserTest(unittest.TestCase):
         self.assertEqual(0, p.mylist_count, 'The video should return 0 mylist count')
 
     def test_videos_with_zero_tags(self):
-        p = get_parser(k_ZERO_TAGS)
-        self.assertEqual([], p.tags, 'tags should be an empty list')
+        for filename in [k_ZERO_TAGS_WITH_JSON, k_ZERO_TAGS_WITHOUT_JSON]:
+            p = get_parser(filename)
+            self.assertEqual([], p.tags, 'tags should be an empty list')
 
     def test_private_identified_as_unavailable(self):
         for filename in [k_PRIVATE_EN, k_PRIVATE_JA]:
