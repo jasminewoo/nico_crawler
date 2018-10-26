@@ -90,7 +90,6 @@ def get_ydl_options(title=None, logger=None):
             'preferredcodec': global_config.instance['convert_to'] if 'convert_to' in global_config.instance else 'm4a',
             'preferredquality': '320',
         }],
-        'noprogress': True
     }
 
     if logger:
