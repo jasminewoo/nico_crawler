@@ -26,7 +26,7 @@ class VideoParserTest(unittest.TestCase):
 
     def test_login_redirect_title(self):
         p = get_parser(k_LOGIN_PAGE)
-        self.assertEqual('ログイン - niconico', p.html_vars['title'].data)
+        self.assertTrue(p.html_vars['title'].is_login_page, 'This is a login page')
 
     def test_login_redirect_is_available(self):
         p = get_parser(k_LOGIN_PAGE)
