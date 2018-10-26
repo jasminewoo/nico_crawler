@@ -13,7 +13,7 @@
 ./nico_crawler.sh start &
 ```
 
-Note: If you are downloading a large collection of videos, consider using it remotely with [nohup](https://linux.die.net/man/1/nohup).
+Note: If you plan to leave the process running for an extended period of time, consider using [nohup](https://linux.die.net/man/1/nohup).
 
 ### Download Videos Manually
 
