@@ -52,6 +52,15 @@ class VideoJson(HTMLVariable):
         self.data = json.loads(self.data)
 
 
+class LoginForm(HTMLVariable):
+    def __init__(self):
+        HTMLVariable.__init__(self, tag_conditions=[{'form.method': 'POST', 'form.id': 'login_form'}])
+
+    @property
+    def is_present(self):
+        return self.data is not None
+
+
 class Message(HTMLVariableCollection):
     def __init__(self):
         HTMLVariableCollection.__init__(self, [

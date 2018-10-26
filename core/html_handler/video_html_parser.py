@@ -10,7 +10,8 @@ class VideoHTMLParser(NicoHTMLParser):
             'mylist': MylistCount(),
             'msg': Message(),
             'json': VideoJson(),
-            'desc': Description()
+            'desc': Description(),
+            'login_form': LoginForm()
         }
 
     @property
@@ -18,11 +19,10 @@ class VideoHTMLParser(NicoHTMLParser):
         unescaped = unescape(self.html_string)
         unavailable = self.status_code == 403 or \
                       self.status_code == 404 or \
-                      self.html_vars['title'].is_login_page or \
+                      self.html_vars['login_form'].is_present or \
                       self.html_vars['msg'].is_private_or_deleted or \
                       '動画が投稿されている公開コミュニティ一覧' in unescaped or \
-                      'チャンネル会員専用動画' in unescaped or \
-                      'メールアドレスまたは電話番号' in unescaped
+                      'チャンネル会員専用動画' in unescaped
         return not unavailable
 
     @property
