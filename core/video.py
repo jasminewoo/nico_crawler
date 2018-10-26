@@ -37,6 +37,10 @@ class Video:
         return urls
 
     @property
+    def title(self):
+        return self.html.video_title
+
+    @property
     def url(self):
         return 'http://www.nicovideo.jp/watch/' + self.video_id
 

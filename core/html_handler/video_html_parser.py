@@ -49,3 +49,9 @@ class VideoHTMLParser(NicoHTMLParser):
             return int(self.video_json['video']['mylistCount'])
         else:
             return self.html_vars['mylist'].data
+
+    @property
+    def video_title(self):
+        if self.video_json:
+            return unescape(self.video_json['video']['originalTitle'])
+        return None
