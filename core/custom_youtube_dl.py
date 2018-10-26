@@ -69,10 +69,10 @@ def sanitize_title(video_title):
 
 
 def get_ydl_options(title=None, requires_creds=False, logger=None):
-    title_format = title if title else '%(title)s'
+    title = sanitize_title(title) if title else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title_format),
+        'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': global_config.instance['convert_to'] if 'convert_to' in global_config.instance else 'm4a',
