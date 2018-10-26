@@ -12,5 +12,6 @@ class CustomYoutubeDLTest(unittest.TestCase):
             '【2人で】ン（Ver）【初心者Fとmorlbon】':'[2人で]ン(Ver)[初心者Fとmorlbon]'
         }
         for org_title, expected in kvps.items():
-            actual = custom_youtube_dl.sanitize_title(org_title)
-            self.assertEqual(expected, actual)
+            with self.subTest(org_title):
+                actual = custom_youtube_dl.sanitize_title(org_title)
+                self.assertEqual(expected, actual)

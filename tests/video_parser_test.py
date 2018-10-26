@@ -74,7 +74,8 @@ class VideoParserTest(unittest.TestCase):
 
     def test_maint_exception(self):
         for filename in [k_MAINT_JA, k_MAINT_EN]:
-            self.assertRaises(ServiceUnderMaintenanceError, get_parser, filename)
+            with self.subTest(filename):
+                self.assertRaises(ServiceUnderMaintenanceError, get_parser, filename)
 
     def test_maint_exception_by_status_code(self):
         # Regular page but with http code 503
@@ -89,13 +90,15 @@ class VideoParserTest(unittest.TestCase):
 
     def test_videos_with_zero_tags(self):
         for filename in [k_ZERO_TAGS_WITH_JSON, k_ZERO_TAGS_WITHOUT_JSON]:
-            p = get_parser(filename)
-            self.assertEqual([], p.tags, 'tags should be an empty list')
+            with self.subTest(filename):
+                p = get_parser(filename)
+                self.assertEqual([], p.tags, 'tags should be an empty list')
 
     def test_private_identified_as_unavailable(self):
         for filename in [k_PRIVATE_EN, k_PRIVATE_JA]:
-            p = get_parser(filename)
-            self.assertFalse(p.is_available, '{}: Video should not be identified as available'.format(filename))
+            with self.subTest(filename):
+                p = get_parser(filename)
+                self.assertFalse(p.is_available, 'Video should not be identified as available')
 
     def test_blank_video(self):
         get_parser(k_BLANK)
@@ -111,8 +114,9 @@ class VideoParserTest(unittest.TestCase):
 
     def test_not_authorized_by_status_code(self):
         for code in [403, 404]:
-            p = get_parser(k_UTATTEMITA_WITH_JSON, status_code=code)
-            self.assertFalse(p.is_available, 'Video should not be identified as available')
+            with self.subTest(code):
+                p = get_parser(k_UTATTEMITA_WITH_JSON, status_code=code)
+                self.assertFalse(p.is_available, 'Video should not be identified as available')
 
 
 def get_parser(filename, status_code=0):
