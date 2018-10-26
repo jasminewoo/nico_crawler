@@ -111,19 +111,20 @@ class CustomLogger:
         self.history = []
 
     def debug(self, msg):
-        self.log_with_history(self.logger.debug, msg)
+        self.log(self.logger.debug, msg)
 
     def warning(self, msg):
-        self.log_with_history(self.logger.debug, msg)
+        self.log(self.logger.debug, msg)
 
     def error(self, msg):
-        self.log_with_history(self.logger.debug, msg)
+        self.log(self.logger.debug, msg)
 
     def hook(self, d):
         pass
 
-    def log_with_history(self, func, msg):
-        self.history.append(msg)
+    def log(self, func, msg, append_to_history=False):
+        if append_to_history:
+            self.history.append(msg)
         func(msg)
 
 
