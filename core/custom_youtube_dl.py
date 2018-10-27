@@ -18,6 +18,7 @@ k_DOWNLOADS_FOLDER_PATH = 'downloads'
 class CustomYoutubeDL(YoutubeDL):
     def __init__(self, video, logger=None):
         params = get_ydl_options(title=video.title, logger=logger)
+        logger.debug("outtmpl='{}'".format(params['outtmpl']))
         YoutubeDL.__init__(self, params=params)
         self.video = video
 
