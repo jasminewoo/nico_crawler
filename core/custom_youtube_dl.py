@@ -88,7 +88,7 @@ def decode_title(b64str):
 
 
 def get_ydl_options(title=None, logger=None):
-    title = title.replace('/', '-').replace('%', '％') if title is not None else '%(title)s'
+    title = title.replace('/', '-').replace('%', '％') if title else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
