@@ -1,6 +1,6 @@
 {
   "convert_to": "m4a",
-  "minimum_mylist": 100,
+  "minimum_mylist": 500,
   "thread_count": 12,
   "title_sanitization": {
     "/": " ",
