@@ -54,7 +54,8 @@ def download(video, logger, storage):
             if not ydl.path:
                 logger.debug('Download completed but the file is not there')
                 raise RetriableError
-            storage.upload_file(ydl.filename, ydl.path)
+            filename = sanitize_title(ydl.filename)
+            storage.upload_file(filename, ydl.path)
     except (URLError, ExtractorError, DownloadError, MemoryError) as e:
         if 'Niconico videos now require logging in' in str(e):
             raise LogInError
@@ -66,14 +67,14 @@ def download(video, logger, storage):
             ydl.remove_local_file()
 
 
-def sanitize_title(video_title):
-    video_title = unicodedata.normalize('NFKC', video_title)
+def sanitize_title(title):
+    title = unicodedata.normalize('NFKC', title)
     for key, value in global_config.instance['title_sanitization'].items():
-        if key in video_title:
-            video_title = video_title.replace(key, value)
-    while '  ' in video_title:
-        video_title = video_title.replace('  ', ' ')
-    return video_title
+        if key in title:
+            title = title.replace(key, value)
+    while '  ' in title:
+        title = title.replace('  ', ' ')
+    return title
 
 
 def encode_title(video_title):
@@ -85,7 +86,7 @@ def decode_title(b64str):
 
 
 def get_ydl_options(title=None, logger=None):
-    title = sanitize_title(title) if title else '%(title)s'
+    title = title.replace('/', '-').replace('%', '％') if title is not None else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
