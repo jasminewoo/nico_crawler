@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class StorageService(metaclass=ABCMeta):
-    def __init__(self):
+    def __init__(self, config=None):
         pass
 
     @abstractmethod

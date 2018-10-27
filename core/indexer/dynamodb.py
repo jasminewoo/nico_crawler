@@ -6,7 +6,7 @@ from boto3 import Session
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
-from indexer.indexer_service import Indexer
+from core.indexer.indexer_service import Indexer
 
 logging.getLogger('boto').setLevel('CRITICAL')
 logging.getLogger('boto3').setLevel('CRITICAL')

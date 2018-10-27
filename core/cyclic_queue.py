@@ -2,8 +2,8 @@ import logging
 from multiprocessing import Lock
 
 from core.repeated_timer import RepeatedTimer
-from core.video import Video
-from indexer.indexer_service import Indexer
+from core.model.video import Video
+from core.indexer.indexer_service import Indexer
 
 k_MAX_QUEUE_SIZE = 300
 k_MAX_RETRY = 3

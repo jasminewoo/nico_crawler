@@ -5,13 +5,12 @@ import logging
 import time
 from multiprocessing import Lock
 
-from googleapiclient.discovery import build
 from googleapiclient.errors import Error, HttpError
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload, MediaInMemoryUpload
-from httplib2 import Http, HttpLib2Error, ServerNotFoundError
-from oauth2client import file, client, tools
+from httplib2 import HttpLib2Error
 
-from storage.storage_service import StorageService
+from core import google_utils
+from core.storage.storage_service import StorageService
 
 logging.getLogger("googleapiclient").setLevel(logging.CRITICAL)
 logging.getLogger('httplib2').setLevel(logging.CRITICAL)
@@ -23,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 class GoogleDrive(StorageService):
-    def __init__(self, config):
+    def __init__(self, config=None):
         StorageService.__init__(self)
         log.info('Google Driving initializing...')
         self.lock = Lock()
@@ -31,8 +30,6 @@ class GoogleDrive(StorageService):
         self.folder_id = None
         if config:
             self.folder_id = config['google_drive_folder_id']
-        self.initialize_service()
-        log.info('Google Drive Ready')
 
     def update_with_file(self, key, path):
         self._upload(is_new_entity=False, key=key, path=path)
@@ -55,6 +52,7 @@ class GoogleDrive(StorageService):
     def _download_inner(self, key, fp):
         try:
             self.lock.acquire()
+            self.initialize_service()
             request = self.service.files().get_media(fileId=key)
             downloader = MediaIoBaseDownload(fp, request)
             done = False
@@ -94,6 +92,7 @@ class GoogleDrive(StorageService):
 
         try:
             self.lock.acquire()
+            self.initialize_service()
             if is_new_entity:
                 metadata = {'name': name}
                 if self.folder_id:
@@ -111,33 +110,23 @@ class GoogleDrive(StorageService):
     def _delete_inner(self, key):
         try:
             self.lock.acquire()
+            self.initialize_service()
             self.service.files().delete(fileId=key).execute()
         finally:
             self.lock.release()
 
+    def create_folder(self, folder_name):
+        raise NotImplementedError
+
     def exists(self, key):
-        pass
+        raise NotImplementedError
 
     def initialize_service(self):
-        store = file.Storage('token.json')
-        creds = store.get()
-        if not creds or creds.invalid:
-            flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-            creds = tools.run_flow(flow, store)
-        trials_remaining = 100
-        while trials_remaining > 0:
-            trials_remaining -= 1
-            try:
-                self.service = build('drive', 'v3', http=creds.authorize(Http()))
-            except (ServerNotFoundError, TimeoutError):
-                # This may happen when the computer loses internet connection
-                log.debug('Initialization failed. trials_remaining={}'.format(trials_remaining))
-                time.sleep(2)
+        if not self.service:
+            self.service = google_utils.create_service(api_name='drive', api_version='v3', scopes=SCOPES)
 
     def run_with_retry(self, function, *args, **kwargs):
-        trials_remaining = 100
-        while trials_remaining > 0:
-            trials_remaining -= 1
+        while True:
             try:
                 return function(*args, **kwargs)
             except HttpError as e:
@@ -148,6 +137,5 @@ class GoogleDrive(StorageService):
             except (BrokenPipeError, Error, TimeoutError, HttpLib2Error) as e:
                 log.debug(e)
 
-            log.debug('Function call failed. trails_remaining={}'.format(trials_remaining))
-            time.sleep(1)
             self.initialize_service()
+            time.sleep(2)

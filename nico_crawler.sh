@@ -26,11 +26,16 @@ elif [ ${action} == "kill" ] ; then
     if [ ${pid} -ne 0 ]; then
         kill ${pid}
     fi
-elif [ ${action} == "gd" ] ; then
-    # TODO: get the user to authenticate
-    # TODO: create directory
-    # TODO : save to config_secret.json
-    echo "Coming soon...\n"
+elif [ ${action} == "google" ] ; then
+    source venv/bin/activate
+    pip3 install -r requirements.txt
+    python3 google_setup.py
+    deactivate
+elif [ ${action} == "aws" ] ; then
+    source venv/bin/activate
+    pip3 install -r requirements.txt
+    python3 aws_setup.py
+    deactivate
 else
     echo "Not recognized action: ${action}"
 fi

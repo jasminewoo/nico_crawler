@@ -1,13 +1,13 @@
 import logging
 from abc import ABCMeta, abstractmethod
 
-from core import global_config
+from core import config
 from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
-from core.nico_object_factory import NicoObjectFactory
+from core.indexer.dynamodb import DynamoDbIndexer
+from core.model.factory import Factory
 from core.repeated_timer import RepeatedTimer
-from indexer.dynamodb import DynamoDbIndexer
-from storage.google_drive import GoogleDrive
+from core.storage.google_drive import GoogleDrive
 
 logger = logging.getLogger(__name__)
 k_REQUEST_FOLDER = 'requests'
@@ -21,13 +21,13 @@ class App(metaclass=ABCMeta):
 
     def create_thread_pool(self):
         threads = []
-        for i in range(global_config.instance['thread_count']):
+        for i in range(config.global_instance['thread_count']):
             threads.append(self.create_thread())
         return threads
 
     def get_storage(self):
-        if 'google_drive_folder_id' in global_config.instance:
-            storage = GoogleDrive(config=global_config.instance)
+        if 'google_drive_folder_id' in config.global_instance:
+            storage = GoogleDrive(config=config.global_instance)
             logger.info('Initialized storage object with config')
             return storage
         storage = GoogleDrive()
@@ -52,7 +52,8 @@ class AppSingleMode(App):
         return DownloadThread(queue=self.queue, storage=self.storage)
 
     def _process(self, url):
-        vids = NicoObjectFactory(url=url, logger=logger).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+        f = Factory(url=url, logger=logger)
+        vids = f.get_videos(min_mylist=config.global_instance['minimum_mylist'] if f.type != Factory.k_MYLIST else 0)
         self.queue.enqueue(vids)
         for thread in self.threads:
             thread.start()
@@ -80,12 +81,12 @@ class AppDaemonMode(App):
     def explore_daily_trending_videos(self):
         logger.info('Enqueuing daily trends...')
         url = 'https://www.nicovideo.jp/ranking/fav/daily/sing'
-        vids = NicoObjectFactory(url=url, logger=logger).get_videos(min_mylist=global_config.instance['minimum_mylist'])
+        vids = Factory(url=url, logger=logger).get_videos(min_mylist=config.global_instance['minimum_mylist'])
         self.queue.enqueue(vids)
 
     def create_indexer(self):
         aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
         for field in aws_required_fields:
-            if field not in global_config.instance:
-                raise AssertionError('AWS credentials must be provided')
-        return DynamoDbIndexer(config=global_config.instance)
+            if field not in config.global_instance:
+                return None
+        return DynamoDbIndexer(config=config.global_instance)

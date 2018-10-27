@@ -2,13 +2,12 @@ import json
 
 import requests
 
-from core.video import Video
+from core.model.video import Video
 
 
 class MyList:
-    def __init__(self, url, logger):
+    def __init__(self, url):
         self.url = url
-        self.logger = logger
 
     def __str__(self):
         return '/'.join(self.url.split('/')[-2:])
@@ -37,13 +36,11 @@ class MyList:
                     mlc = int(item['item_data']['mylist_counter'])
                     v = Video(video_id=id, mylist_count=mlc)
                     vids.append(v)
-            else:
-                self.logger.debug('{} is empty'.format(self))
 
         elif r.status_code == 403 or r.status_code == 404 or '非公開マイリスト' in html_str or 'ページが見つかりません' in html_str:
-            self.logger.debug('Private mylist {}'.format(self.url))
+            pass
         elif r.status_code == 503:
-            self.logger.debug('Service in maintenance')
+            pass
         else:
             raise RuntimeError('Could not get data from {}; {}'.format(self.url, html_str))
 

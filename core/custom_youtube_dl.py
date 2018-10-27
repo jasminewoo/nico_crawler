@@ -7,7 +7,7 @@ from urllib.error import URLError
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import ExtractorError, DownloadError
 
-from core import global_config
+from core import config
 
 logging.getLogger('niconico').setLevel('CRITICAL')
 logging.getLogger('youtube_dl').setLevel('CRITICAL')
@@ -71,7 +71,7 @@ def download(video, logger, storage):
 
 def sanitize_title(title):
     title = unicodedata.normalize('NFKC', title)
-    for key, value in global_config.instance['title_sanitization'].items():
+    for key, value in config.global_instance['title_sanitization'].items():
         if key in title:
             title = title.replace(key, value)
     while '  ' in title:
@@ -94,7 +94,7 @@ def get_ydl_options(title=None, logger=None):
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': global_config.instance['convert_to'] if 'convert_to' in global_config.instance else 'm4a',
+            'preferredcodec': config.global_instance['convert_to'] if 'convert_to' in config.global_instance else 'm4a',
             'preferredquality': '320',
         }]
     }
@@ -104,9 +104,9 @@ def get_ydl_options(title=None, logger=None):
         options['logger'] = cl
         options['progress_hooks']: [cl.hook]
 
-    if 'nico_username' in global_config.instance and 'nico_password' in global_config.instance:
-        options['username'] = global_config.instance['nico_username']
-        options['password'] = global_config.instance['nico_password']
+    if 'nico_username' in config.global_instance and 'nico_password' in config.global_instance:
+        options['username'] = config.global_instance['nico_username']
+        options['password'] = config.global_instance['nico_password']
 
     return options
 

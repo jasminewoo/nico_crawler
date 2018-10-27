@@ -2,8 +2,8 @@ import re
 
 import requests
 
-from core import global_config
-from core.video import Video
+from core import config
+from core.model.video import Video
 
 k_MYLIST_PATTERN = re.compile('(?<=<a href="/mylistcomment/)(.*?)">(.*?)(?=</a>)')
 
@@ -40,7 +40,7 @@ class Search:
                     rest = line_split[1]
                     pos = k_MYLIST_PATTERN.search(rest).regs[-1]
                     mylist_count = int(rest[pos[0]:pos[1]].replace(',', ''))
-                    if mylist_count >= global_config.instance['minimum_mylist']:
+                    if mylist_count >= config.global_instance['minimum_mylist']:
                         vid = Video(video_id=video_id, mylist_count=mylist_count)
                         vids.append(vid)
                     else:

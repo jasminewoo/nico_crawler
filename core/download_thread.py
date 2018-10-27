@@ -3,13 +3,15 @@ from __future__ import unicode_literals
 import logging
 import threading
 import time
+import traceback
 from threading import Thread
 
-from core import global_config, logging_utils, custom_youtube_dl
+from core import config, logging_utils, custom_youtube_dl
 from core.custom_youtube_dl import RetriableError, LogInError
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
-from core.nico_object_factory import NicoObjectFactory
-from core.video import Video
+from core.model.factory import Factory
+from core.model.video import Video
+from core.notification.gmail import Gmail
 
 logging.getLogger('urllib').setLevel('CRITICAL')
 
@@ -33,6 +35,7 @@ class DownloadThread(Thread):
                 keep_running = self.run_single_iteration()
             except Exception as e:
                 self.logger.exception(e)
+                Gmail().send(to_address='me', subject='nico_crawler thread failure', body=traceback.format_exc())
                 keep_running = False
 
     def run_single_iteration(self):
@@ -78,8 +81,8 @@ class DownloadThread(Thread):
         self.logger.debug('{}.video_type={}'.format(video, video.video_type))
         for url in video.related_urls:
             self.logger.debug('Processing url={}'.format(url))
-            factory = NicoObjectFactory(url=url, logger=self.logger)
-            related_videos = factory.get_videos(min_mylist=global_config.instance['minimum_mylist'])
+            factory = Factory(url=url, logger=self.logger)
+            related_videos = factory.get_videos(min_mylist=config.global_instance['minimum_mylist'])
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             results = self.queue.enqueue(related_videos)
             self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))

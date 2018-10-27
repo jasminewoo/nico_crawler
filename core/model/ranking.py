@@ -2,7 +2,7 @@ import re
 
 import requests
 
-from core.video import Video
+from core.model.video import Video
 
 k_MYLIST_PATTERN = re.compile('(?<=<a href="/mylistcomment/video/)(.*?)">(.*?)(?=</a>)')
 

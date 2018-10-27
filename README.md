@@ -35,10 +35,11 @@ where `url` is:
 ./nico_crawler.sh kill
 ```
 
-### Auto-upload to Google Drive
+### Setup Dependencies
 
 ```bash
-./nico_crawler.sh gd
+./nico_crawler.sh google
+./nico_crawler.sh aws
 ```
 
 Note: This is a one-time configuration. 
