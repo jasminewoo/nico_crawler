@@ -52,10 +52,12 @@ def download(video, logger, storage):
             raise RuntimeError('Download failed')
         if storage:
             if not ydl.path:
-                logger.debug('Download completed but the file is not there')
+                logger.debug('Download completed but the file is not there; cannot upload to cloud')
                 raise RetriableError
+            logger.debug('Now uploading the file to cloud...')
             filename = sanitize_title(ydl.filename)
             storage.upload_file(filename, ydl.path)
+            logger.debug('Upload done')
     except (URLError, ExtractorError, DownloadError, MemoryError) as e:
         if 'Niconico videos now require logging in' in str(e):
             raise LogInError
