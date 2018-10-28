@@ -22,15 +22,12 @@ class QueueElement:
 
 
 class CyclicQueue:
-    def __init__(self, indexer=None):
+    def __init__(self, indexer):
         self._lock = Lock()
         self._list = []
         self.indexer = indexer
-        if indexer:
-            self.cached_indexer = self.indexer.get_all_video_ids_as_set()
-            self.replenish_timer = RepeatedTimer(30, self.replenish)
-        else:
-            self.cached_indexer = set()
+        self.cached_indexer = self.indexer.get_all_video_ids_as_set()
+        self.replenish_timer = RepeatedTimer(30, self.replenish)
 
     def replenish(self):
         if len(self._list) > k_MAX_QUEUE_SIZE // 10:
@@ -63,13 +60,11 @@ class CyclicQueue:
         results = {'enqueued': 0, 'skipped': 0}
         self._lock.acquire()
         for video in videos:
-            exists = video.video_id in self.cached_indexer or \
-                     (self.indexer and self.indexer.exists(video_id=video.video_id))
+            exists = video.video_id in self.cached_indexer or self.indexer.exists(video.video_id)
             if not exists:
                 if len(self._list) <= k_MAX_QUEUE_SIZE:
                     self._list.append(QueueElement(video))
-                if self.indexer:
-                    self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
+                self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_PENDING)
                 self.cached_indexer.add(video.video_id)
                 results['enqueued'] = results['enqueued'] + 1
             else:
@@ -94,24 +89,21 @@ class CyclicQueue:
 
     def mark_as_done(self, video):
         self._lock.acquire()
-        if self.indexer:
-            self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_DONE)
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_DONE)
         qe = self.get_qe_by_video_id(video.video_id)
         self._list.remove(qe)
         self._lock.release()
 
     def mark_as_login_required(self, video):
         self._lock.acquire()
-        if self.indexer:
-            self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_LOGIN_REQUIRED)
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_LOGIN_REQUIRED)
         qe = self.get_qe_by_video_id(video.video_id)
         self._list.remove(qe)
         self._lock.release()
 
     def mark_as_referenced(self, video):
         self._lock.acquire()
-        if self.indexer:
-            self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_REFERENCED)
+        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_REFERENCED)
         qe = self.get_qe_by_video_id(video.video_id)
         self._list.remove(qe)
         self._lock.release()
