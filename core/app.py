@@ -66,7 +66,7 @@ class AppSingleMode(App):
         self.queue.replenish_timer.stop()
 
     def create_indexer(self):
-        return None
+        return LocalIndexer(config={'filename': 'single_local_indexer'})
 
 
 class AppDaemonMode(App):
