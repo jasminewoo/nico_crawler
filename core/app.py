@@ -5,6 +5,7 @@ from core import config
 from core.cyclic_queue import CyclicQueue
 from core.download_thread import DownloadThread
 from core.indexer.dynamodb import DynamoDbIndexer
+from core.indexer.local import LocalIndexer
 from core.model.factory import Factory
 from core.repeated_timer import RepeatedTimer
 from core.storage.google_drive import GoogleDrive
@@ -88,5 +89,5 @@ class AppDaemonMode(App):
         aws_required_fields = ['aws_region', 'aws_access_key_id', 'aws_secret_access_key']
         for field in aws_required_fields:
             if field not in config.global_instance:
-                return None
+                return LocalIndexer()
         return DynamoDbIndexer(config=config.global_instance)
