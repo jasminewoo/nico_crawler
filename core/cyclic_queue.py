@@ -63,8 +63,8 @@ class CyclicQueue:
         results = {'enqueued': 0, 'skipped': 0}
         self._lock.acquire()
         for video in videos:
-            exists = video.video_id in self.cached_indexer or (
-                    self.indexer and self.indexer.exists(video_id=video.video_id))
+            exists = video.video_id in self.cached_indexer or \
+                     (self.indexer and self.indexer.exists(video_id=video.video_id))
             if not exists:
                 if len(self._list) <= k_MAX_QUEUE_SIZE:
                     self._list.append(QueueElement(video))

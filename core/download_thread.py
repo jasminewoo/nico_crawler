@@ -35,7 +35,8 @@ class DownloadThread(Thread):
                 keep_running = self.run_single_iteration()
             except Exception as e:
                 self.logger.exception(e)
-                Gmail().send(to_address='me', subject='nico_crawler thread failure', body=traceback.format_exc())
+                Gmail().send(subject='nico_crawler failure ' + threading.current_thread().getName(),
+                             body=traceback.format_exc())
                 keep_running = False
 
     def run_single_iteration(self):

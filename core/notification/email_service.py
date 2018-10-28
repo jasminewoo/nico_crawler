@@ -10,5 +10,5 @@ class Email:
         self.credentials = credentials
 
     @abstractmethod
-    def send(self, to_address, subject, body):
+    def send(self, subject, body):
         pass
