@@ -32,3 +32,7 @@ class Indexer(metaclass=ABCMeta):
     def exists(self, video_id):
         status = self.get_status(video_id=video_id)
         return status != self.k_STATUS_NOT_FOUND
+
+    @property
+    def count(self):
+        return len(self.get_all_video_ids_as_set())

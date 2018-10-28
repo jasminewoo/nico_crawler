@@ -116,3 +116,4 @@ nohup.out
 downloads
 config_secret.json
 *token.json
+*local_indexer
