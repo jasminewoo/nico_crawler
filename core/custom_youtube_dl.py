@@ -7,7 +7,8 @@ from urllib.error import URLError
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import ExtractorError, DownloadError
 
-from core import config, string_utils
+from core import config
+from core.utils import string_utils
 
 logging.getLogger('niconico').setLevel('CRITICAL')
 logging.getLogger('youtube_dl').setLevel('CRITICAL')

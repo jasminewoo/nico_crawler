@@ -1,6 +1,6 @@
 import unittest
 
-from core.path_utils import get_root_prefix
+from core.utils.path_utils import get_root_prefix
 
 
 class CustomTestCase(unittest.TestCase):

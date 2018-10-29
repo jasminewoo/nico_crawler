@@ -9,7 +9,7 @@ from googleapiclient.errors import Error, HttpError
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload, MediaInMemoryUpload
 from httplib2 import HttpLib2Error
 
-from core import google_utils
+from core.utils import google_utils
 from core.storage.storage_service import StorageService
 
 logging.getLogger("googleapiclient").setLevel(logging.CRITICAL)

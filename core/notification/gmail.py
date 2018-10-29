@@ -1,7 +1,7 @@
 import base64
 from email.mime.text import MIMEText
 
-from core.google_utils import create_service
+from core.utils.google_utils import create_service
 from core.notification.email_service import Email
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.metadata'

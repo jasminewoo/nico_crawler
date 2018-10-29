@@ -1,7 +1,7 @@
 import json
 import os
 
-from core import path_utils
+from core.utils import path_utils
 
 
 class Config(dict):

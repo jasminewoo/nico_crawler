@@ -1,7 +1,7 @@
 import os
 
 from core.indexer.indexer_service import Indexer
-from core.path_utils import get_root_prefix
+from core.utils.path_utils import get_root_prefix
 
 k_FILENAME = 'local_indexer'
 

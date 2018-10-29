@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from httplib2 import Http, ServerNotFoundError
 from oauth2client import file, client, tools
 
-from core.path_utils import get_root_prefix
+from core.utils.path_utils import get_root_prefix
 
 
 def create_service(api_name, api_version, scopes):

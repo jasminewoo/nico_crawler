@@ -6,7 +6,8 @@ import time
 import traceback
 from threading import Thread
 
-from core import config, logging_utils, custom_youtube_dl
+from core import config, custom_youtube_dl
+from core.utils import logging_utils
 from core.custom_youtube_dl import RetriableError, LogInError
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.model.factory import Factory
