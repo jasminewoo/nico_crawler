@@ -29,5 +29,5 @@ class CustomYoutubeDLTest(CustomTestCase):
         v = Video(video_id='sm')
         v._html = p
         params = custom_youtube_dl.get_ydl_options(video=v)
-        self.assertTrue(params['outtmpl'].startswith('-％'), "'-％' should be in 'outtmpl'")
+        self.assertTrue('-％' in params['outtmpl'], "'-％' should be in 'outtmpl'")
         self.assertFalse('%(title)s' in params['outtmpl'], "'%(title)s' should not be in 'outtmpl'")
