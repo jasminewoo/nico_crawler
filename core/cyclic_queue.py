@@ -6,7 +6,7 @@ from core.model.video import Video
 from core.indexer.indexer_service import Indexer
 
 k_MAX_QUEUE_SIZE = 300
-k_MAX_RETRY = 3
+k_MAX_RETRY = 1
 
 default_logger = logging.getLogger(__name__)
 
