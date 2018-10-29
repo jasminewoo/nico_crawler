@@ -7,7 +7,7 @@ from urllib.error import URLError
 from youtube_dl import YoutubeDL
 from youtube_dl.utils import ExtractorError, DownloadError
 
-from core import config
+from core import config, string_utils
 
 logging.getLogger('niconico').setLevel('CRITICAL')
 logging.getLogger('youtube_dl').setLevel('CRITICAL')
@@ -88,7 +88,7 @@ def decode_title(b64str):
 
 
 def get_ydl_options(video, logger=None):
-    title = video.title.translate({'/': '-', '%': '％'}) if video.title else '%(title)s'
+    title = string_utils.multi_replace(video.title, {'/': '-', '%': '％'}) if video.title else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
