@@ -81,7 +81,10 @@ class DownloadThread(Thread):
         for url in video.related_urls:
             self.logger.debug('Processing url={}'.format(url))
             factory = Factory(url=url, logger=self.logger)
-            related_videos = factory.get_videos(min_mylist=config.global_instance['minimum_mylist'])
+            try:
+                related_videos = factory.get_videos(min_mylist=config.global_instance['minimum_mylist'])
+            except (ConnectionError,ConnectionResetError):
+                raise RetriableError
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             results = self.queue.enqueue(related_videos)
             self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))
