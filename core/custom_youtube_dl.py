@@ -138,5 +138,5 @@ class RetriableError(Exception):
     pass
 
 
-class LogInError(Exception):
+class LogInError(RetriableError):
     pass

@@ -62,12 +62,10 @@ class DownloadThread(Thread):
                 self.queue.enqueue_again(video)
                 self.logger.info('Service under maintenance; thread going to sleep for 30 min...')
                 time.sleep(1800)
-            except RetriableError:
+            except RetriableError as e:
+                video.login_failed = type(e) is LogInError
                 self.queue.enqueue_again(video)
                 self.logger.info('Pending retry: {}'.format(video))
-            except LogInError:
-                self.queue.mark_as_login_required(video)
-                self.logger.info('LogInError:    {}'.format(video))
         else:
             if not self.is_daemon:
                 self.logger.debug('This thread is out of work. Existing now...')
