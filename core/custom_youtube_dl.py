@@ -17,7 +17,7 @@ k_DOWNLOADS_FOLDER_PATH = 'downloads'
 
 class CustomYoutubeDL(YoutubeDL):
     def __init__(self, video, logger=None):
-        params = get_ydl_options(title=video.title, logger=logger)
+        params = get_ydl_options(video=video, logger=logger)
         logger.debug("outtmpl='{}'".format(params['outtmpl']))
         YoutubeDL.__init__(self, params=params)
         self.video = video
@@ -87,8 +87,8 @@ def decode_title(b64str):
     return base64.urlsafe_b64decode(b64str.encode()).decode()
 
 
-def get_ydl_options(title=None, logger=None):
-    title = title.replace('/', '-').replace('%', '％') if title else '%(title)s'
+def get_ydl_options(video, logger=None):
+    title = video.title.translate({'/': '-', '%': '％'}) if video.title else '%(title)s'
     options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': '{}/%(upload_date)s-{}-%(id)s.%(ext)s'.format(k_DOWNLOADS_FOLDER_PATH, title),
@@ -104,7 +104,7 @@ def get_ydl_options(title=None, logger=None):
         options['logger'] = cl
         options['progress_hooks']: [cl.hook]
 
-    if 'nico_username' in config.global_instance and 'nico_password' in config.global_instance:
+    if video.login_failed and 'nico_username' in config.global_instance and 'nico_password' in config.global_instance:
         options['username'] = config.global_instance['nico_username']
         options['password'] = config.global_instance['nico_password']
 
