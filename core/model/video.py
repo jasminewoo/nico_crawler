@@ -15,6 +15,8 @@ class Video:
             self.video_id = url.split('/')[-1].split('?')[0]
         if video_id:
             self.video_id = video_id
+        if not self.video_id:
+            raise AssertionError("'video_id' or 'url' needed.")
         self.login_failed = False
         self._html = None
         self._mylist_count = mylist_count
