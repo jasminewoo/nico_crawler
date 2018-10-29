@@ -1,3 +1,4 @@
+import json
 import unittest
 
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
@@ -17,6 +18,7 @@ k_PRIVATE_EN = 'video_private_en.html'
 k_BLANK = 'video_blank.html'
 k_CHANNEL_ONLY = 'video_channel_members_only.html'
 k_NOT_AUTHORIZED = 'video_not_authorized.html'
+k_ENG = 'video_with_json_eng.html'
 
 
 class VideoParserTest(CustomTestCase):
@@ -117,6 +119,10 @@ class VideoParserTest(CustomTestCase):
             with self.subTest(code):
                 p = self.get_parser(k_UTATTEMITA_WITH_JSON, status_code=code)
                 self.assertFalse(p.is_available, 'Video should not be identified as available')
+
+    def test_original_title_with_eng_translation(self):
+        p = self.get_parser(k_ENG)
+        self.assertEqual('夜もすがら君想ふ　歌ってみた　【夏代孝明とnqrse】', p.video_title)
 
     def get_parser(self, filename, status_code=0):
         html_string = self.get_resource_contents(path=filename)
