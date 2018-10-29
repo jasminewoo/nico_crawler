@@ -24,15 +24,10 @@ class CustomYoutubeDLTest(CustomTestCase):
                 actual = custom_youtube_dl.sanitize_title(org_title)
                 self.assertEqual(expected, actual)
 
-    def test_title_transformation_null_title(self):
-        v = Video(video_id='sm')
-        params = custom_youtube_dl.get_ydl_options(video=v)
-        self.assertTrue('%(title)s' in params['outtmpl'], "'%(title)s' should be in 'outtmpl'")
-
-    def test_title_transformation_real_title(self):
+    def test_title_transformation(self):
         p = VideoHTMLParser(html_string=self.get_resource_contents(k_VIDEO_WITH_ILLEGAL_TITLE))
         v = Video(video_id='sm')
         v._html = p
         params = custom_youtube_dl.get_ydl_options(video=v)
-        self.assertTrue('-％' in params['outtmpl'], "'-％' should be in 'outtmpl'")
+        self.assertTrue(params['outtmpl'].startswith('-％'), "'-％' should be in 'outtmpl'")
         self.assertFalse('%(title)s' in params['outtmpl'], "'%(title)s' should not be in 'outtmpl'")
