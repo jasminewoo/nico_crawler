@@ -94,13 +94,6 @@ class CyclicQueue:
         self._list.remove(qe)
         self._lock.release()
 
-    def mark_as_login_required(self, video):
-        self._lock.acquire()
-        self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_LOGIN_REQUIRED)
-        qe = self.get_qe_by_video_id(video.video_id)
-        self._list.remove(qe)
-        self._lock.release()
-
     def mark_as_referenced(self, video):
         self._lock.acquire()
         self.indexer.set_status(video_id=video.video_id, status=Indexer.k_STATUS_REFERENCED)
