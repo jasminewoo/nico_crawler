@@ -15,3 +15,9 @@ def multi_replace(input_string, replace_dict):
     rep = dict((re.escape(k), v) for k, v in rep.items())
     pattern = re.compile("|".join(rep.keys()))
     return pattern.sub(lambda m: rep[re.escape(m.group(0))], input_string)
+
+
+def contains_any_of_substrings(string, substrings):
+    if not type(substrings) is list:
+        raise AssertionError("'substrings' must be a list")
+    return any(x in string for x in substrings)

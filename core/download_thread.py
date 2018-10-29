@@ -7,7 +7,7 @@ import traceback
 from threading import Thread
 
 from core import config, custom_youtube_dl
-from core.utils import logging_utils
+from core.utils import logging_utils, string_utils
 from core.custom_youtube_dl import RetriableError, LogInError
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
 from core.model.factory import Factory
@@ -47,8 +47,11 @@ class DownloadThread(Thread):
             try:
                 vt = video.video_type
                 if vt == Video.k_VIDEO_TYPE_UTATTEMITA:
-                    self.logger.info('Downloading:   {}'.format(video))
-                    custom_youtube_dl.download(video=video, logger=self.logger, storage=self.storage)
+                    if not _title_contains_banned_keywords(video):
+                        self.logger.info('Downloading:   {}'.format(video))
+                        custom_youtube_dl.download(video=video, logger=self.logger, storage=self.storage)
+                    else:
+                        self.logger.debug('Skipped:       {} for containing banned keyword(s)'.format(video))
                     self.queue.mark_as_done(video)
                     self.logger.info('Finished:      {}'.format(video))
                     self.enqueue_related_videos(video=video)
@@ -84,9 +87,19 @@ class DownloadThread(Thread):
             factory = Factory(url=url, logger=self.logger)
             try:
                 related_videos = factory.get_videos(min_mylist=config.global_instance['minimum_mylist'])
-            except (ConnectionError,ConnectionResetError):
+            except (ConnectionError, ConnectionResetError):
                 raise RetriableError
             self.logger.debug('{} len(related_videos)={}'.format(url, len(related_videos)))
             results = self.queue.enqueue(related_videos)
             self.logger.debug('{}.enqueue_related_videos {}'.format(video, results))
         self.logger.debug('Crawl Done:    {}'.format(video))
+
+
+def _title_contains_banned_keywords(video):
+    return _title_contains_keywords(video, config.global_instance['banned_keywords'])
+
+
+def _title_contains_keywords(video, keywords):
+    if video.title:
+        return string_utils.contains_any_of_substrings(video.title, keywords)
+    return False
