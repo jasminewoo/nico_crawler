@@ -11,12 +11,12 @@ class DownloadThreadTest(CustomTestCase):
         html_string = self.get_resource_contents(k_VIDEO_HTML)
         v = Video(video_id='fake_id_123')
         v._html = VideoHTMLParser(html_string=html_string)
-        contains = download_thread._contains_keywords(video=v, keywords=['そう'])
+        contains = download_thread._title_contains_keywords(video=v, keywords=['そう'])
         self.assertTrue(contains, 'The title contains the banned keyword')
 
     def test_contains_banned_keywords_negative(self):
         html_string = self.get_resource_contents(k_VIDEO_HTML)
         v = Video(video_id='fake_id_123')
         v._html = VideoHTMLParser(html_string=html_string)
-        contains = download_thread._contains_keywords(video=v, keywords=['keyword1', 'keyword2'])
+        contains = download_thread._title_contains_keywords(video=v, keywords=['keyword1', 'keyword2'])
         self.assertFalse(contains, 'The title does not contain the banned keyword')
