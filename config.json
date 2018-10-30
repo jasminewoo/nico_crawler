@@ -1,7 +1,7 @@
 {
   "convert_to": "m4a",
   "minimum_mylist": 500,
-  "thread_count": 8,
+  "thread_count": 16,
   "title_sanitization": {
     "/": " ",
     "〜": "~",
