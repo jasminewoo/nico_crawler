@@ -106,10 +106,11 @@ def get_ydl_options(video, logger=None):
         options['progress_hooks']: [cl.hook]
 
     if video.login_failed:
-        if 'nico_username' in config.global_instance and 'nico_password' in config.global_instance:
-            options['username'] = config.global_instance['nico_username']
-            options['password'] = config.global_instance['nico_password']
-            logger.debug(video.video_id + ' login failed previously; logging in this time.')
+        if config.global_instance.has_nico_creds():
+            nc = config.global_instance.get_random_nico_creds()
+            options['username'] = nc.username
+            options['password'] = nc.password
+            logger.debug(video.video_id + ' login failed previously; logging in this time with ' + nc.username)
         else:
             raise LogInError(video.video_id + ' login failed previously, but nicovideo credentials not provided')
 
