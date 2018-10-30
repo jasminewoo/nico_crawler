@@ -1,4 +1,3 @@
-import json
 import unittest
 
 from core.html_handler.nico_html_parser import ServiceUnderMaintenanceError
