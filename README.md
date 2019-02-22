@@ -1,23 +1,27 @@
 # nico_crawler
 
-Crawls [nicovideo.jp](https://nicovideo.jp) for '歌ってみた' songs.
+nico_crawler is a serverless application that can be deployed to AWS Cloud. It crawls [nicovideo.jp](https://nicovideo.jp) and finds '歌ってみた' songs.
 
-* Sends out a daily notification that lists popular songs. See [Crawling Logic](#crawling-logic) for details.
+* Sends out a daily list of popular songs. See [Crawling Logic](#crawling-logic) for details.
 * User can choose songs to save to the designated Amazon S3 bucket.
 * Lambda, SQS, and DynamoDB are used in a very casual manner, and the costs should be covered by the [Free Tier](https://aws.amazon.com/free/) offers. However, you will have to pay for S3. See [S3 Cost Estimation](#s3-cost-estimation) for details. 
 
 
 ## Setup Guide
 
-1. Create an SNS topic and subscribe yourself (email, SMS, etc)
-1. Create a 
-
-Deploy the following templates to your AWS account:
-* SNS 
-
+1. Create an SNS topic and subscribe yourself (email, SMS, etc). Make a note of the ARN.
+1. Create an SQS queue. Make a note of the ARN.
+1. Install [sam](https://aws.amazon.com/serverless/sam/).
+1. Run the following set of bash commands:
+    ```bash
+    aws cloudformation ... nc_bucket.yaml
+    aws cloudformation ... nc_role.yaml
+    (... more stuff... TBD)
+    (sam command for the lambda function...TBD)
+    ```
 
 ## Crawling Logic
-hehehe
+TBD (prob a diagram)
 
 
 ## S3 Cost Estimation
