@@ -22,23 +22,24 @@ hehehe
 
 ## S3 Cost Estimation
 
+Assumptions:
+* Your S3 bucket resides in the Tokyo region
+* You empty your bucket once a month
+
 ```python
 # Adjust the values for your usage
 SONGS_PER_MONTH = 50
 GB_PER_SONG = 0.007
 MONTHLY_STORAGE_COST_PER_GB = 0.019
-TRANSFER_COST_PER_GB = 0.114
+TRANSFER_OUT_COST_PER_GB = 0.114
 
 cost_store = sum(range(SONGS_PER_MONTH)) * GB_PER_SONG * MONTHLY_STORAGE_COST_PER_GB
-cost_transfer = SONGS_PER_MONTH * GB_PER_SONG * TRANSFER_COST_PER_GB
+cost_transfer = SONGS_PER_MONTH * GB_PER_SONG * TRANSFER_OUT_COST_PER_GB
 
 print(f'Storage \t${round(cost_store, 2)}')
-# Storage 	$0.16
-
 print(f'Transfer\t${round(cost_transfer, 2)}')
-# Transfer	$0.04
 ```
-
-Assumptions:
-* Your S3 bucket resides in the Tokyo region
-* You empty your bucket once a month
+```
+Storage 	$0.16
+Transfer	$0.04
+```
