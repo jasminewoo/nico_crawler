@@ -146,5 +146,3 @@ config_secret.json
 
 *.pyc
 venv/
-
-old_code/
