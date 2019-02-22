@@ -1,0 +1,7 @@
+{
+  "min_view": 500,
+  "min_mylist": 50,
+  "min_vm_ratio": 0.05,
+  "preferred_format": "m4a",
+  "banned_keywords": []
+}
