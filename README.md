@@ -4,7 +4,7 @@ Crawls [nicovideo.jp](https://nicovideo.jp) for '歌ってみた' songs.
 
 * Sends out a daily notification that lists popular songs. See [Crawling Logic](#crawling-logic) for details.
 * User can choose songs to save to the designated Amazon S3 bucket.
-* Lambda, SQS, and DynamoDB are used in a very casual manner, and should be covered by the [Free Tier](https://aws.amazon.com/free/) offers. However, you will have to pay for storage and data transfer.
+* Lambda, SQS, and DynamoDB are used in a very casual manner, and the costs should be covered by the [Free Tier](https://aws.amazon.com/free/) offers. However, you will have to pay for S3. See [S3 Cost Estimation](#s3-cost-estimation) for details. 
 
 
 ## Setup Guide
@@ -23,8 +23,9 @@ hehehe
 ## S3 Cost Estimation
 
 Assumptions:
-* Your S3 bucket resides in the Tokyo region
-* You empty your bucket once a month
+* Your stack resides in the Tokyo region.
+* You empty your bucket once a month.
+* Request fees are not included in the calculation, because they are most likely negligible.
 
 ```python
 # Adjust the values for your usage
