@@ -17,8 +17,13 @@ nico_crawler is a serverless application that can be deployed to AWS Cloud. It c
     aws cloudformation ... nc_bucket.yaml
     (sam command for the lambda function...TBD)
     ```
+## Architecture
 
-## Crawling Logic
+See the sequence diagram below to understand how this application is structured.
+
+![Sequence Diagram](sequence_diagram.png)
+
+### Crawling Logic
 Here is a little block of pseudo code that demonstrates what's happening behind the scenes. 
 ```python
 def crawl_queue_handler(message):
