@@ -24,18 +24,17 @@ Here is a little block of pseudo code that demonstrates what's happening behind 
 def crawl_queue_handler(message):
     video = message.video
     
-    if video.id not in download_history and evaluate(video):
-        download_queue.put(video.id)
+    if video.id not in download_history and is_satisfied(user_def_conditions, video):
+        new_message = DownloadMessage(video=video)
+        download_queue.put(new_message)
         
     if message.remaining_depth > 0:
         new_depth = message.remaining_depth - 1
-        videos = get_related_videos(video)
-        for child_video in videos:
-            if video.id == child_video.id:
+        for related_video in get_related_videos(video):
+            if video.id == related_video.id:
                 continue
-            new_crawl_message = Message(video=child_video, remaining_depth=new_depth)
-            crawl_queue.put(new_crawl_message)
-
+            new_message = CrawlMessage(video=related_video, remaining_depth=new_depth)
+            crawl_queue.put(new_message)
 
 def get_related_videos(video):
     more_by_uploader = nico_client.profile(video.uploader).get_all_videos()
