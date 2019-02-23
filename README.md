@@ -19,7 +19,29 @@ nico_crawler is a serverless application that can be deployed to AWS Cloud. It c
     ```
 
 ## Crawling Logic
-TBD (prob a diagram)
+Here is a little block of pseudo code that demonstrates what's happening behind the scenes. 
+```python
+def crawl_queue_handler(message):
+    video = message.video
+    
+    if video.id not in download_history and evaluate(video):
+        download_queue.put(video.id)
+        
+    if message.remaining_depth > 0:
+        new_depth = message.remaining_depth - 1
+        videos = get_related_videos(video)
+        for child_video in videos:
+            if video.id == child_video.id:
+                continue
+            new_crawl_message = Message(video=child_video, remaining_depth=new_depth)
+            crawl_queue.put(new_crawl_message)
+
+
+def get_related_videos(video):
+    more_by_uploader = nico_client.profile(video.uploader).get_all_videos()
+    search_results = nico_client.search(video.title)
+    return more_by_uploader + search_results
+```
 
 
 ## S3 Cost Estimation
