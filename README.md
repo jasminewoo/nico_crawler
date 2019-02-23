@@ -21,7 +21,7 @@ nico_crawler is a serverless application that can be deployed to AWS Cloud. It c
 
 See the sequence diagram below to understand how this application is structured.
 
-![Sequence Diagram](sequence_diagram.png)
+![Sequence Diagram](sequence_diagram.svg)
 
 ### Crawling Logic
 Here is a little block of pseudo code that demonstrates what's happening behind the scenes. 
